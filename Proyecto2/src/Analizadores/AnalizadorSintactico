@@ -1,0 +1,534 @@
+package Analizadores;
+import java_cup.runtime.*;
+
+
+parser code{:
+public Nodo avl;
+:}
+
+terminal String PARENTESISABRE, PARENTESISCIERRA, LLAVEABRE, LLAVECIERRA, PUNTOYCOMA, SIGNOPOR, SIGNOMAS, SIGNOMENOS, 
+SIGNODIVISION, SIGNOMODULO, SIGNOIGUAL, SIGNOMAYOR, SIGNOMENOR, SIGNOMAYORIGUAL, SIGNOMENORIGUAL, SIGNOIGUALIGUAL, 
+SIGNOCOMA, SIGNODIFERENTE, SIGNOINCREMENTO, SIGNODECREMENTO, SIGNOOR, SIGNOAND, SIGNONOT, CORCHETEABRE, 
+CORCHETECIERRA, DOSPUNTOS, SIGNOPOTENCIA, SIGNOINTERROGACION, RESERVADA_ENTERO, RESERVADA_DOBLE, RESERVADA_BINARIO, 
+RESERVADA_VERDADERO, RESERVADA_FALSO, RESERVADA_CARACTER, RESERVADA_CADENA,RESERVADA_SI, RESERVADA_SINO, RESERVADA_IMPRIMIR, 
+RESERVADA_SELECTOR, RESERVADA_CASO, RESERVADA_PORDEFECTO, RESERVADA_MIENTRAS, RESERVADA_PARA, RESERVADA_HACER, 
+RESERVADA_CORTAR, RESERVADA_CONTINUAR, RESERVADA_RETORNO, RESERVADA_VOID, RESERVADA_REDONDEO, RESERVADA_TIPODE, 
+RESERVADA_ACADENA, RESERVADA_LONGITUD, RESERVADA_EJECUTAR, RESERVADA_NUEVO, ENTERO, ID, CADENA, CHARR, DECIMALES;
+
+non terminal instrucciones_g, instruccion_g, declaracion_fym, sentencia_ejecutar, declaracion_funcion, declaracion_metodo, 
+instrucciones, parametros, instruccion, parametro, tipo, declaracion_var, asignacion_var, lista_variables, expresion, dato, 
+casteo, actualizaciones, vector, lista_valores, declaracion_vector, acceso_vector, modificacion_vector, sentencia_si, 
+sentencia_selector, caso, defecto, sentencia_mientras, sentencia_para, sentencia_hacer, sentencia_cortar, lista_casos,
+sentencia_continuar, sentencia_retorno, llamada, 1parametros_llamada, funcion_imprimir, funcion_redondeo, funcion_longitud, 
+funcion_tipode, funcion_acadena, programa;
+
+precedence nonassoc SIGNOINTERROGACION;
+precedence right SIGNOMENOS;
+precedence nonassoc SIGNOPOTENCIA;
+precedence left  SIGNODIVISION, SIGNOPOR;
+precedence left SIGNOMAS, SIGNOMENOS;
+precedence right SIGNOMODULO;
+precedence left SIGNOIGUALIGUAL, SIGNODIFERENTE, SIGNOMENOR, SIGNOMENORIGUAL, SIGNOMAYOR, SIGNOMAYORIGUAL;
+precedence right SIGNONOT;
+precedence left SIGNOAND;
+precedence left SIGNOOR;
+precedence nonassoc SIGNOIGUAL;
+
+start with programa;
+
+programa ::= instrucciones_g:a {: avl=(Nodo)a; :};
+
+instrucciones_g ::= instrucciones_g:a instruccion_g:b {: Nodo padre = new Nodo("instrucciones_g");
+                                                         padre.hijos.add((Nodo)a);
+                                                         padre.hijos.add((Nodo)b);
+                                                         RESULT=padre; :}
+                    |instruccion_g:a {: Nodo padre = new Nodo("instrucciones_g");
+                                                         padre.hijos.add((Nodo)a);
+                                                         RESULT=padre; :};
+
+instruccion_g ::= declaracion_fym:a {: RESULT=(Nodo)a; :}
+| sentencia_ejecutar:a {: RESULT=(Nodo)a; :} ;
+
+sentencia_ejecutar ::= RESERVADA_EJECUTAR ID:a PARENTESISABRE PARENTESISCIERRA PUNTOYCOMA {:
+    Nodo padre = new Nodo("sentencia_ejecutar"); 
+    padre.hijos.add(new Nodo("ID", a));
+    RESULT=padre;
+:}
+| RESERVADA_EJECUTAR ID:a PARENTESISABRE parametros_llamada:b PARENTESISCIERRA PUNTOYCOMA{:
+    Nodo padre = new Nodo("sentencia_ejecutar"); 
+    padre.hijos.add(new Nodo("ID", a));
+    padre.hijos.add((Nodo)b);
+    RESULT=padre;
+:} ;
+
+
+declaracion_fym ::= declaracion_funcion:a {: RESULT=(Nodo)a; :}
+| declaracion_metodo:a {: RESULT=(Nodo)a; :} ;
+
+declaracion_metodo ::= RESERVADA_VOID ID:a PARENTESISABRE parametros:b PARENTESISCIERRA LLAVEABRE instrucciones:c LLAVECIERRA{:
+    Nodo padre = new Nodo("declaracion_metodo"); 
+    padre.hijos.add(new Nodo("ID", a));
+    padre.hijos.add((Nodo)b);
+    padre.hijos.add((Nodo)c);
+    RESULT=padre;
+:}
+| RESERVADA_VOID ID:a PARENTESISABRE PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA{:
+    Nodo padre = new Nodo("declaracion_metodo"); 
+    padre.hijos.add(new Nodo("ID", a));
+    padre.hijos.add((Nodo)b);
+    RESULT=padre;
+:};
+
+parametros ::= parametro:a {:
+    Nodo padre = new Nodo("parametros"); 
+    padre.hijos.add((Nodo)a);
+    RESULT=padre;
+:}
+| parametros:a SIGNOCOMA parametro:b {:
+    Nodo padre = new Nodo("parametros"); 
+    padre.hijos.add((Nodo)a);
+    padre.hijos.add((Nodo)b);
+    RESULT=padre;
+:};
+
+parametro ::= tipo:a ID:b{:
+    Nodo padre = new Nodo("parametro"); 
+    padre.hijos.add((Nodo)a);
+    padre.hijos.add(new Nodo("ID", b));
+    RESULT=padre;
+:};
+
+tipo ::= RESERVADA_ENTERO:a {: RESULT=new Nodo("RESERVADA_ENTERO",a); :} 
+| RESERVADA_DOBLE:a {: RESULT=new Nodo("RESERVADA_DOBLE",a); :} 
+| RESERVADA_BINARIO:a {: RESULT=new Nodo("RESERVADA_BINARIO",a); :} 
+| RESERVADA_CARACTER:a {: RESULT=new Nodo("RESERVADA_CARACTER",a); :} 
+| RESERVADA_CADENA:a {: RESULT=new Nodo("RESERVADA_CADENA",a); :} ;
+
+instrucciones ::= instrucciones:a instruccion:b {: 
+Nodo padre = new Nodo("instrucciones");
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)b);
+RESULT=padre; :}
+| instruccion:a {: 
+Nodo padre = new Nodo("instrucciones");
+padre.hijos.add((Nodo)a);
+RESULT=padre; :};
+
+instruccion ::= declaracion_var:a {: RESULT=(Nodo)a; :}
+| asignacion_var:a {: RESULT=(Nodo)a; :}
+| actualizaciones:a PUNTOYCOMA {: RESULT=(Nodo)a; :}
+| declaracion_vector:a {: RESULT=(Nodo)a; :}
+| modificacion_vector:a {: RESULT=(Nodo)a; :}
+| funcion_imprimir:a {: RESULT=(Nodo)a; :}
+| sentencia_selector:a {: RESULT=(Nodo)a; :}
+| sentencia_si:a {: RESULT=(Nodo)a; :}
+| sentencia_mientras:a {: RESULT=(Nodo)a; :}
+| sentencia_para:a {: RESULT=(Nodo)a; :}
+| sentencia_hacer:a {: RESULT=(Nodo)a; :}
+| sentencia_cortar:a {: RESULT=(Nodo)a; :}
+| sentencia_continuar:a {: RESULT=(Nodo)a; :}
+| sentencia_retorno:a {: RESULT=(Nodo)a; :}
+| llamada:a PUNTOYCOMA {: RESULT=(Nodo)a; :};
+
+declaracion_var ::= tipo:a lista_variables:b SIGNOIGUAL expresion:c PUNTOYCOMA {: 
+Nodo padre = new Nodo("declaracion_var");
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)b);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+
+| tipo:a lista_variables:b PUNTOYCOMA {: 
+Nodo padre = new Nodo("declaracion_var");
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)b);
+RESULT=padre; :};
+
+lista_variables ::= ID:a {:
+Nodo padre = new Nodo("lista_variables");
+padre.hijos.add(new Nodo("ID",a));
+RESULT=padre; :}
+
+| lista_variables:a SIGNOCOMA ID:b {: 
+Nodo padre = new Nodo("lista_variables");
+padre.hijos.add((Nodo)a);
+padre.hijos.add(new Nodo("ID",b));
+RESULT=padre; :};
+
+expresion ::= expresion:a SIGNOMAS:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOMENOS:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOPOR:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNODIVISION:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOPOTENCIA:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOMODULO:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| SIGNOMENOS:b expresion:a{: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+RESULT=padre; :}
+| expresion:a SIGNOIGUALIGUAL:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNODIFERENTE:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOMENOR:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOMENORIGUAL:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOMAYOR:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOMAYORIGUAL:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOINTERROGACION:b expresion:c DOSPUNTOS expresion:d {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+padre.hijos.add((Nodo)d);
+RESULT=padre; :}
+| expresion:a SIGNOOR:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| expresion:a SIGNOAND:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+| SIGNONOT:b expresion:a {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+RESULT=padre; :}
+| PARENTESISABRE expresion:a PARENTESISCIERRA {:RESULT = (Nodo)a;:}
+| casteo:a {:RESULT = (Nodo)a;:}
+| vector:a {:RESULT = (Nodo)a;:}
+| acceso_vector:a {:RESULT = (Nodo)a;:}
+| dato:a {:RESULT = (Nodo)a;:}
+| funcion_redondeo:a {:RESULT = (Nodo)a;:}
+| funcion_longitud:a {:RESULT = (Nodo)a;:}
+| funcion_tipode:a {:RESULT = (Nodo)a;:}
+| funcion_acadena:a {:RESULT = (Nodo)a;:}
+| llamada:a {:RESULT = (Nodo)a;:};
+
+dato ::= ID:a {:RESULT = new Nodo("ID", a);:}
+| ENTERO:a {:RESULT = new Nodo("ENTERO", a);:}
+| CADENA:a  {:RESULT = new Nodo("CADENA", a);:}
+| CHARR:a  {:RESULT = new Nodo("CHARR", a);:}
+| DECIMALES:a  {:RESULT = new Nodo("DECIMALES", a);:}
+| RESERVADA_VERDADERO:a  {:RESULT = new Nodo("RESERVADA_VERDADERO", a);:}
+| RESERVADA_FALSO:a  {:RESULT = new Nodo("RESERVADA_FALSO", a);:}; 
+
+asignacion_var ::= ID:a SIGNOIGUAL expresion:b PUNTOYCOMA{: 
+Nodo padre = new Nodo("asignacion_var");
+padre.hijos.add(new Nodo("ID", a));
+padre.hijos.add((Nodo)b);
+RESULT=padre; :}
+;
+
+casteo ::= PARENTESISABRE tipo:a PARENTESISCIERRA expresion:b {:
+Nodo padre = new Nodo("casteo");
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)b);
+RESULT=padre;
+:}
+;
+
+actualizaciones ::= ID:a SIGNOINCREMENTO:b {:
+Nodo padre = new Nodo("actualizaciones", b);
+padre.hijos.add(new Nodo("ID",a));
+RESULT=padre; :}
+| ID:a SIGNODECREMENTO:b {:
+Nodo padre = new Nodo("actualizaciones", b);
+padre.hijos.add(new Nodo("ID",a));
+RESULT=padre; :};
+
+declaracion_vector ::= tipo:a ID:b CORCHETEABRE CORCHETECIERRA SIGNOIGUAL RESERVADA_NUEVO tipo CORCHETEABRE expresion:c CORCHETECIERRA PUNTOYCOMA {:
+    Nodo padre = new Nodo("declaracion_vector");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add(new Nodo("ID",b));
+        padre.hijos.add((Nodo)c);
+        RESULT=padre;
+:}
+| tipo:a ID:b CORCHETEABRE CORCHETECIERRA CORCHETEABRE CORCHETECIERRA SIGNOIGUAL RESERVADA_NUEVO tipo CORCHETEABRE expresion:c CORCHETECIERRA CORCHETEABRE expresion:d CORCHETECIERRA PUNTOYCOMA{:
+        Nodo padre = new Nodo("declaracion_vector");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add(new Nodo("ID",b));
+        padre.hijos.add((Nodo)c);
+        padre.hijos.add((Nodo)d);
+        RESULT=padre;
+:}
+| tipo:a ID:b CORCHETEABRE CORCHETECIERRA SIGNOIGUAL vector:c PUNTOYCOMA{:
+        Nodo padre = new Nodo("declaracion_vector");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add(new Nodo("ID",b));
+        padre.hijos.add((Nodo)c);
+        RESULT=padre;
+
+:}
+| tipo:a ID:b CORCHETEABRE CORCHETECIERRA CORCHETEABRE CORCHETECIERRA SIGNOIGUAL vector:c PUNTOYCOMA {:
+        Nodo padre = new Nodo("declaracion_vector");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add(new Nodo("ID",b));
+        padre.hijos.add((Nodo)c);
+        RESULT=padre;
+:};
+
+vector ::= CORCHETEABRE lista_valores:a CORCHETECIERRA {: 
+        Nodo padre = new Nodo("vector");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:};
+
+lista_valores ::= expresion:a {: 
+        Nodo padre = new Nodo("lista_valores");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:}
+| lista_valores:a SIGNOCOMA expresion:b {:
+        Nodo padre = new Nodo("lista_valores");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:};
+
+acceso_vector ::= acceso_vector:a  CORCHETEABRE expresion:b CORCHETECIERRA {:
+        Nodo padre = new Nodo("acceso_vector");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:}
+| ID:a CORCHETEABRE expresion:b CORCHETECIERRA {:
+        Nodo padre = new Nodo("acceso_vector");
+        padre.hijos.add(new Nodo("ID",a));
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:};
+
+modificacion_vector ::= acceso_vector:a SIGNOIGUAL expresion:b PUNTOYCOMA {:
+        Nodo padre = new Nodo("modificacion_vector");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:};
+
+sentencia_si ::= RESERVADA_SI PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA {:
+        Nodo padre = new Nodo("sentencia_si");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:}
+| RESERVADA_SI PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA RESERVADA_SINO LLAVEABRE instrucciones:c LLAVECIERRA {:
+        Nodo padre = new Nodo("sentencia_si");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        padre.hijos.add((Nodo)c);
+        RESULT=padre;
+:}
+| RESERVADA_SI PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA RESERVADA_SINO sentencia_si:c {:
+        Nodo padre = new Nodo("sentencia_si");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        padre.hijos.add((Nodo)c);
+        RESULT=padre;
+:};
+
+sentencia_selector ::= RESERVADA_SELECTOR PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE lista_casos:b defecto:c LLAVECIERRA {:
+        Nodo padre = new Nodo("sentencia_selector");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        padre.hijos.add((Nodo)c);
+        RESULT=padre;
+:}
+| RESERVADA_SELECTOR PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE lista_casos:b LLAVECIERRA {:
+        Nodo padre = new Nodo("sentencia_selector");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:}
+| RESERVADA_SELECTOR PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE defecto:b LLAVECIERRA {:
+        Nodo padre = new Nodo("sentencia_selector");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:};
+
+lista_casos ::= lista_casos:a caso:b {:
+        Nodo padre = new Nodo("lista_casos");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:}
+| caso:a {: RESULT=(Nodo)a; :};
+
+caso ::= RESERVADA_CASO expresion:a DOSPUNTOS instrucciones:b {:
+        Nodo padre = new Nodo("caso");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:};
+
+defecto ::= RESERVADA_PORDEFECTO DOSPUNTOS instrucciones:a {:
+        Nodo padre = new Nodo("defecto");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:};
+
+sentencia_mientras ::= RESERVADA_MIENTRAS PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA {:
+        Nodo padre = new Nodo("sentencia_mientras");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:};
+
+sentencia_para ::= RESERVADA_PARA PARENTESISABRE declaracion_var:a expresion:b PUNTOYCOMA actualizaciones:c PARENTESISCIERRA LLAVEABRE instrucciones:d LLAVECIERRA {:
+        Nodo padre = new Nodo("sentencia_para");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        padre.hijos.add((Nodo)c);
+        padre.hijos.add((Nodo)d);
+        RESULT=padre;
+:}
+| RESERVADA_PARA PARENTESISABRE asignacion_var:a expresion:b PUNTOYCOMA actualizaciones:c PARENTESISCIERRA LLAVEABRE instrucciones:d LLAVECIERRA {:
+        Nodo padre = new Nodo("sentencia_para");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        padre.hijos.add((Nodo)c);
+        padre.hijos.add((Nodo)d);
+        RESULT=padre;
+:};
+
+sentencia_hacer ::= RESERVADA_HACER LLAVEABRE instrucciones:a LLAVECIERRA RESERVADA_MIENTRAS PARENTESISABRE expresion:b PARENTESISCIERRA PUNTOYCOMA {:
+        Nodo padre = new Nodo("sentencia_hacer");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:};
+
+sentencia_cortar ::= RESERVADA_CORTAR PUNTOYCOMA {:
+        Nodo padre = new Nodo("sentencia_cortar");
+        RESULT=padre;
+:};
+
+sentencia_continuar ::= RESERVADA_CONTINUAR PUNTOYCOMA {:
+        Nodo padre = new Nodo("sentencia_continuar");
+        RESULT=padre;
+:};
+
+sentencia_retorno ::= RESERVADA_RETORNO PUNTOYCOMA {:
+        Nodo padre = new Nodo("sentencia_retorno");
+        RESULT=padre;
+:}
+| RESERVADA_RETORNO expresion:a PUNTOYCOMA {:
+        Nodo padre = new Nodo("sentencia_retorno");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:};
+
+declaracion_funcion ::= tipo:a ID:b PARENTESISABRE parametros:c PARENTESISCIERRA LLAVEABRE instrucciones:d LLAVECIERRA {:
+        Nodo padre = new Nodo("declaracion_funcion");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add(new Nodo("ID",b));
+        padre.hijos.add((Nodo)c);
+        padre.hijos.add((Nodo)d);
+        RESULT=padre;
+:}
+| tipo:a ID:b PARENTESISABRE PARENTESISCIERRA LLAVEABRE instrucciones:c LLAVECIERRA {:
+        Nodo padre = new Nodo("declaracion_funcion");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add(new Nodo("ID",b));
+        padre.hijos.add((Nodo)c);
+        RESULT=padre;
+:};
+
+llamada ::= ID:a PARENTESISABRE parametros_llamada:b PARENTESISCIERRA {:
+        Nodo padre = new Nodo("llamada");
+        padre.hijos.add(new Nodo("ID",a));
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:}
+| ID:a PARENTESISABRE PARENTESISCIERRA {:
+        Nodo padre = new Nodo("llamada");
+        padre.hijos.add(new Nodo("ID",a));
+        RESULT=padre;
+:};
+
+parametros_llamada ::= parametros_llamada:a SIGNOCOMA expresion:b {:
+        Nodo padre = new Nodo("parametros_llamada");
+        padre.hijos.add((Nodo)a);
+        padre.hijos.add((Nodo)b);
+        RESULT=padre;
+:}
+| expresion:a {:
+        Nodo padre = new Nodo("parametros_llamada");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:};
+
+funcion_imprimir ::= RESERVADA_IMPRIMIR PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
+        Nodo padre = new Nodo("funcion_imprimir");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:};
+
+funcion_redondeo ::= RESERVADA_REDONDEO PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
+        Nodo padre = new Nodo("funcion_redondeo");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:};
+
+funcion_longitud ::= RESERVADA_LONGITUD PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
+        Nodo padre = new Nodo("funcion_longitud");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:};
+
+funcion_tipode ::= RESERVADA_TIPODE PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
+        Nodo padre = new Nodo("funcion_tipode");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:};
+
+funcion_acadena ::= RESERVADA_ACADENA PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
+        Nodo padre = new Nodo("funcion_acadena");
+        padre.hijos.add((Nodo)a);
+        RESULT=padre;
+:};
