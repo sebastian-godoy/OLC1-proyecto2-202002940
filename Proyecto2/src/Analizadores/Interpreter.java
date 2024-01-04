@@ -7,6 +7,7 @@ public class Interpreter {
 
     public Nodo avl;
     public Nodo comienzo_programa;
+    // Lista de simbolos
     public ArrayList<SymTable> symTSL = new ArrayList<>();
     public String texto_salida = "";
 
@@ -24,111 +25,184 @@ public class Interpreter {
     
 
     public void get_env(Nodo actual) {
-    if (actual.titulo.equals("declaracion_metodo")) {
+    if (actual.titulo.equals("declaracion_metodo")) 
+    {
         if (actual.hijos.size() == 3) 
         {
-            actual.hijos.get(0).entorno = actual.entorno;
-            actual.hijos.get(1).entorno = actual.entorno + "_" + actual.hashCode();
-            actual.hijos.get(2).entorno = actual.entorno + "_" + actual.hashCode();
+            actual.hijos.get(0).nivel = actual.nivel;
+            actual.hijos.get(1).nivel = actual.nivel + "_" + actual.hashCode();
+            
+            //Subnivel detectado
+            actual.hijos.get(2).nivel = actual.nivel + "_" + actual.hashCode();
         } 
         else 
         {
-            actual.hijos.get(0).entorno = actual.entorno;
-            actual.hijos.get(1).entorno = actual.entorno + "_" + actual.hashCode();
+            actual.hijos.get(0).nivel = actual.nivel;
+            
+            
+            actual.hijos.get(1).nivel = actual.nivel + "_" + actual.hashCode();
         }
     } 
     else if (actual.titulo.equals("declaracion_funcion")) 
     {
         if (actual.hijos.size() == 4) {
-            actual.hijos.get(1).entorno = actual.entorno;
-            actual.hijos.get(2).entorno = actual.entorno + "_" + actual.hashCode();
-            actual.hijos.get(3).entorno = actual.entorno + "_" + actual.hashCode();
+            actual.hijos.get(1).nivel = actual.nivel;
+            
+            actual.hijos.get(2).nivel = actual.nivel + "_" + actual.hashCode();
+            
+            
+            actual.hijos.get(3).nivel = actual.nivel + "_" + actual.hashCode();
         } 
-        else {
+        else 
+        {
            // En caso de entrar
-            actual.hijos.get(1).entorno = actual.entorno;
-            actual.hijos.get(2).entorno = actual.entorno + "_" + actual.hashCode();
+            actual.hijos.get(1).nivel = actual.nivel;
+            
+            
+            actual.hijos.get(2).nivel = actual.nivel + "_" + actual.hashCode();
         }
     } 
     else if (actual.titulo.equals("sentencia_si") || actual.titulo.equals("sentencia_selector")) 
     {
         if (actual.hijos.size() == 3) 
         { 
-            actual.hijos.get(0).entorno = actual.entorno;
-            actual.hijos.get(1).entorno = actual.entorno + "_" + actual.hashCode();
-            actual.hijos.get(2).entorno = actual.entorno + "_" + actual.hashCode();
+            actual.hijos.get(0).nivel = actual.nivel;
+            
+            
+            actual.hijos.get(1).nivel = actual.nivel + "_" + actual.hashCode();
+            
+            
+            actual.hijos.get(2).nivel = actual.nivel + "_" + actual.hashCode();
         } 
         else 
         {
-            actual.hijos.get(0).entorno = actual.entorno;
-            actual.hijos.get(1).entorno = actual.entorno + "_" + actual.hashCode();
+            actual.hijos.get(0).nivel = actual.nivel;
+            
+            actual.hijos.get(1).nivel = actual.nivel + "_" + actual.hashCode();
         }
     } 
     else if (actual.titulo.equals("sentencia_mientras")) 
     {
-        actual.hijos.get(0).entorno = actual.entorno;
-        actual.hijos.get(1).entorno = actual.entorno + "_" + actual.hashCode();
+        actual.hijos.get(0).nivel = actual.nivel;
+        
+        
+        actual.hijos.get(1).nivel = actual.nivel + "_" + actual.hashCode();
+        
+        
     } else if (actual.titulo.equals("sentencia_para") || actual.titulo.equals("sentencia_hacer")) {
         actual.hijos.forEach((x) -> {
-            x.entorno = actual.entorno + "_" + actual.hashCode();
+            
+            
+            x.nivel = actual.nivel + "_" + actual.hashCode();
+            
         });
     } else 
     {
         actual.hijos.forEach((x) -> {
-            x.entorno = actual.entorno;
+            
+            x.nivel = actual.nivel;
         });
     }
 
     SymTable n_simbolo = new SymTable();
     String tipo;
+    
+    
     String rol;
-    String entorno;
+    
+    String nivel;
+    
 
-    if (actual.titulo.equals("declaracion_metodo")) {
+    if (actual.titulo.equals("declaracion_metodo")) 
+    {
+        
         n_simbolo.identificador = actual.hijos.get(0).dato;
         n_simbolo.rol = "metodo";
-        n_simbolo.entorno = actual.entorno;
+        
+        
+        n_simbolo.nivel = actual.nivel;
+        
         n_simbolo.tipo = "void";
 
         if (actual.hijos.size() == 2) {
             n_simbolo.instrucciones = actual.hijos.get(1);
         } else {
             n_simbolo.instrucciones = actual.hijos.get(2);
+            
+            
             n_simbolo.parametros = interpretar_parametros(actual.hijos.get(1));
         }
         this.symTSL.add(n_simbolo);
+        
     } else if (actual.titulo.equals("parametros")) {
+        
         n_simbolo.rol = "parametro";
-        n_simbolo.entorno = actual.entorno;
+        
+        
+        
+        
+        
+        
+        n_simbolo.nivel = actual.nivel;
 
-        if (actual.hijos.size() == 2) {
+        if (actual.hijos.size() == 2) 
+        {
+            
+            
+            
             n_simbolo.identificador = actual.hijos.get(1).hijos.get(1).dato;
+            
+            
+            
             n_simbolo.tipo = actual.hijos.get(1).hijos.get(0).dato;
-        } else {
+            
+            
+        } else 
+        {
             n_simbolo.identificador = actual.hijos.get(0).hijos.get(1).dato;
+            
+            
+            
             n_simbolo.tipo = actual.hijos.get(0).hijos.get(0).dato;
         }
 
-        switch (n_simbolo.tipo) {
+        switch (n_simbolo.tipo) 
+        {
             case "entero" -> n_simbolo.valor = 0;
+            
+            
+            
             case "doble" -> n_simbolo.valor = (float) 0.0;
+            
             case "binario" -> n_simbolo.valor = true;
+            
+            
+            
             case "caracter" -> n_simbolo.valor = '\u0000';
+            
             case "cadena" -> n_simbolo.valor = "";
         }
         this.symTSL.add(n_simbolo);
-    } else if (actual.titulo.equals("declaracion_var")) {
+    } else if (actual.titulo.equals("declaracion_var")) 
+    {
+        
         tipo = actual.hijos.get(0).dato;
         rol = "variable";
-        entorno = actual.entorno;
+        nivel = actual.nivel;
 
         ArrayList<String> lista_vars = interpretar_lista_variables(actual.hijos.get(1));
 
         lista_vars.forEach((identificador) -> {
+            
             SymTable simbolo_variable = new SymTable();
+            
             simbolo_variable.tipo = tipo;
+            
             simbolo_variable.rol = rol;
-            simbolo_variable.entorno = entorno;
+   
+            
+            simbolo_variable.nivel = nivel;
+            
             simbolo_variable.identificador = identificador;
             switch (simbolo_variable.tipo) {
                 case "entero" -> simbolo_variable.valor = 0;
@@ -142,7 +216,7 @@ public class Interpreter {
     } else if (actual.titulo.equals("declaracion_funcion")) {
         n_simbolo.identificador = actual.hijos.get(1).dato;
         n_simbolo.rol = "funcion";
-        n_simbolo.entorno = actual.entorno;
+        n_simbolo.nivel = actual.nivel;
         n_simbolo.tipo = actual.hijos.get(0).dato;
 
         if (actual.hijos.size() == 3) {
@@ -191,138 +265,139 @@ public class Interpreter {
     }
 
     public void print_TSM() {
-        System.out.println("|identificador|rol|tipo|entorno|valor|parametros|instrucciones|\n");
+        System.out.println("+ID-tk-type-lvl-value-params-realizando+\n");
         this.symTSL.forEach((s) -> {
-            System.out.print("|" + s.identificador + "|" + s.rol + "|" + s.tipo + "|" + s.entorno + "|");
+            System.out.print("+" + s.identificador + "-" + s.rol + "-" + s.tipo + "-" + s.nivel + "+");
             if (s.valor != null) {
                 switch (s.tipo) {
                     case "entero" ->
-                        System.out.print((int) s.valor + "|");
+                        System.out.print((int) s.valor + "-");
                     case "doble" ->
-                        System.out.print((float) s.valor + "|");
+                        System.out.print((float) s.valor + "-");
                     case "binario" ->
-                        System.out.print((boolean) s.valor + "|");
+                        System.out.print((boolean) s.valor + "-");
                     case "caracter" ->
-                        System.out.print((char) s.valor + "|");
+                        System.out.print((char) s.valor + "-");
                     case "cadena" ->
-                        System.out.print("\"" + (String) s.valor + "\"|");
+                        System.out.print("\"" + (String) s.valor + "\"-");
                 }
             } else {
-                System.out.print(" --- |");
+                System.out.print(" ");
             }
             if (s.parametros != null) {
                 s.parametros.forEach((param) -> {
                     System.out.print(param + " ");
                 });
-                System.out.print("|");
+                System.out.print("+");
             } else {
-                System.out.print(" --- |");
+                System.out.print("  ");
             }
 
             if (s.instrucciones != null) {
-                System.out.print(s.instrucciones.hashCode() + "|\n");
+                System.out.print(s.instrucciones.hashCode() + "\n");
             } else {
-                System.out.print(" --- |\n");
+                System.out.print("\n");
             }
 
         });
     }
 
-    public LogOutput interpretar(ArrayList<SymTable> entorno, Nodo actual) {
+    public LogOutput interpretar(ArrayList<SymTable> nivel, Nodo actual) {
         LogOutput retorno = new LogOutput();
         switch (actual.titulo) {
             case "expresion" -> {
-                LogOutput r1;
-                LogOutput r2;
+                LogOutput REGISTRO_A;
+                LogOutput REGISTRO_B_HIJO;
                 switch (actual.dato) {
                     case "+" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
-                        if (!r1.tipo.equals(r2.tipo)) {
-                            this.texto_salida += "Suma de tipos diferentes: " + r1.tipo + " y " + r2.tipo;
+                        if (!REGISTRO_A.tipo.equals(REGISTRO_B_HIJO.tipo)) {
+                            this.texto_salida += "Suma de tipos diferentes: " + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                             retorno.sentencia = "ERROR FATAL";
                             return retorno;
                         }
 
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) {
                             case "entero" -> {
                                 retorno.tipo = "entero";
-                                retorno.valor = (int) r1.valor + (int) r2.valor;
+                                retorno.valor = (int) REGISTRO_A.valor + (int) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
 
                             case "doble" -> {
                                 retorno.tipo = "doble";
-                                retorno.valor = (float) r1.valor + (float) r2.valor;
+                                retorno.valor = (float) REGISTRO_A.valor + (float) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
 
                             case "binario" -> {
-                                this.texto_salida += "Error de tipos en la suma, se intento sumar binario";
+                                this.texto_salida += "Error de tipos en la suma";
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
 
                             case "caracter" -> {
                                 retorno.tipo = "cadena";
-                                retorno.valor = "" + (char) r1.valor + (char) r2.valor;
+                                retorno.valor = "" + (char) REGISTRO_A.valor + (char) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
                             case "cadena" -> {
                                 retorno.tipo = "cadena";
-                                retorno.valor = (String) r1.valor + (String) r2.valor;
+                                retorno.valor = (String) REGISTRO_A.valor + (String) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
                         }
                     }
 
                     case "-" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
                         if (actual.hijos.size() == 2) {
-                            r2 = interpretar(entorno, actual.hijos.get(1));
+                            REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
-                            if (!r1.tipo.equals(r2.tipo)) {
-                                this.texto_salida += "Error de tipos en la resta, se intento restar tipos diferentes: " + r1.tipo + " y " + r2.tipo;
+                            if (!REGISTRO_A.tipo.equals(REGISTRO_B_HIJO.tipo)) {
+                                this.texto_salida += "Error en la resta, se intento restar " + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
 
-                            switch (r1.tipo) {
+                            switch (REGISTRO_A.tipo) {
                                 case "entero" -> {
                                     retorno.tipo = "entero";
-                                    retorno.valor = (int) r1.valor - (int) r2.valor;
+                                    retorno.valor = (int) REGISTRO_A.valor - (int) REGISTRO_B_HIJO.valor;
                                     return retorno;
                                 }
 
                                 case "doble" -> {
                                     retorno.tipo = "doble";
-                                    retorno.valor = (float) r1.valor - (float) r2.valor;
+                                    retorno.valor = (float) REGISTRO_A.valor - (float) REGISTRO_B_HIJO.valor;
                                     return retorno;
                                 }
 
                                 default -> {
-                                    this.texto_salida += "Error de tipos en la resta, se intento restar " + r1.tipo;
+                                    this.texto_salida += "Error se intento restar " + REGISTRO_A.tipo;
                                     retorno.sentencia = "error";
                                     return retorno;
                                 }
                             }
                         }
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) 
+                        {
                             case "entero" -> {
                                 retorno.tipo = "entero";
-                                retorno.valor = -(int) r1.valor;
+                                retorno.valor = -(int) REGISTRO_A.valor;
                                 return retorno;
                             }
 
                             case "doble" -> {
                                 retorno.tipo = "doble";
-                                retorno.valor = -(float) r1.valor;
+                                retorno.valor = -(float) REGISTRO_A.valor;
                                 return retorno;
                             }
 
                             default -> {
-                                this.texto_salida += "Error de tipos en la resta, se intento restar " + r1.tipo;
+                                this.texto_salida += "Error en la resta, se intento restar " + REGISTRO_A.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
@@ -330,30 +405,30 @@ public class Interpreter {
                     }
 
                     case "*" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
-                        if (!r1.tipo.equals(r2.tipo)) {
-                            this.texto_salida += "Error de tipos en la multiplicacion, se intento multiplicar tipos diferentes: " + r1.tipo + " y " + r2.tipo;
+                        if (!REGISTRO_A.tipo.equals(REGISTRO_B_HIJO.tipo)) {
+                            this.texto_salida += "Error en la multiplicacion, se intento operar: " + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                             retorno.sentencia = "error";
                             return retorno;
                         }
 
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) {
                             case "entero" -> {
                                 retorno.tipo = "entero";
-                                retorno.valor = (int) r1.valor * (int) r2.valor;
+                                retorno.valor = (int) REGISTRO_A.valor * (int) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
 
                             case "doble" -> {
                                 retorno.tipo = "doble";
-                                retorno.valor = (float) r1.valor * (float) r2.valor;
+                                retorno.valor = (float) REGISTRO_A.valor * (float) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
 
                             default -> {
-                                this.texto_salida += "Error de tipos en la multiplicacion, se intento multiplicar " + r1.tipo;
+                                this.texto_salida += "Error en la multiplicacion: " + REGISTRO_A.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
@@ -361,30 +436,30 @@ public class Interpreter {
                     }
 
                     case "/" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
-                        if (!r1.tipo.equals(r2.tipo)) {
-                            this.texto_salida += "Error de tipos en la division, se intento dividir tipos diferentes: " + r1.tipo + " y " + r2.tipo;
+                        if (!REGISTRO_A.tipo.equals(REGISTRO_B_HIJO.tipo)) {
+                            this.texto_salida += "Error en la division, se intento dividir: " + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                             retorno.sentencia = "error";
                             return retorno;
                         }
 
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) {
                             case "entero" -> {
                                 retorno.tipo = "entero";
-                                retorno.valor = (int) r1.valor / (int) r2.valor;
+                                retorno.valor = (int) REGISTRO_A.valor / (int) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
 
                             case "doble" -> {
                                 retorno.tipo = "doble";
-                                retorno.valor = (float) r1.valor / (float) r2.valor;
+                                retorno.valor = (float) REGISTRO_A.valor / (float) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
 
                             default -> {
-                                this.texto_salida += "Error de tipos en la division, se intento dividir " + r1.tipo;
+                                this.texto_salida += "Error de tipos en la division: " + REGISTRO_A.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
@@ -392,30 +467,30 @@ public class Interpreter {
                     }
 
                     case "^" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
-                        if (!r1.tipo.equals(r2.tipo)) {
-                            this.texto_salida += "Error de tipos en la potenciacion, se intento potenciar tipos diferentes: " + r1.tipo + " y " + r2.tipo;
+                        if (!REGISTRO_A.tipo.equals(REGISTRO_B_HIJO.tipo)) {
+                            this.texto_salida += "Error en la potencia debido a: " + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                             retorno.sentencia = "error";
                             return retorno;
                         }
 
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) {
                             case "entero" -> {
                                 retorno.tipo = "entero";
-                                retorno.valor = (int) Math.pow((int) r1.valor, (int) r2.valor);
+                                retorno.valor = (int) Math.pow((int) REGISTRO_A.valor, (int) REGISTRO_B_HIJO.valor);
                                 return retorno;
                             }
 
                             case "doble" -> {
                                 retorno.tipo = "doble";
-                                retorno.valor = (float) Math.pow((float) r1.valor, (float) r2.valor);
+                                retorno.valor = (float) Math.pow((float) REGISTRO_A.valor, (float) REGISTRO_B_HIJO.valor);
                                 return retorno;
                             }
 
                             default -> {
-                                this.texto_salida += "Error de tipos en la potenciacion, se intento potenciar " + r1.tipo;
+                                this.texto_salida += "Error de potenciacion: " + REGISTRO_A.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
@@ -423,30 +498,30 @@ public class Interpreter {
                     }
 
                     case "%" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
-                        if (!r1.tipo.equals(r2.tipo)) {
-                            this.texto_salida += "Error de tipos en el modulo, se intento operar tipos diferentes: " + r1.tipo + " y " + r2.tipo;
+                        if (!REGISTRO_A.tipo.equals(REGISTRO_B_HIJO.tipo)) {
+                            this.texto_salida += "Error de div modular entre: " + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                             retorno.sentencia = "error";
                             return retorno;
                         }
 
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) {
                             case "entero" -> {
                                 retorno.tipo = "entero";
-                                retorno.valor = (int) r1.valor % (int) r2.valor;
+                                retorno.valor = (int) REGISTRO_A.valor % (int) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
 
                             case "doble" -> {
                                 retorno.tipo = "doble";
-                                retorno.valor = (float) r1.valor % (float) r2.valor;
+                                retorno.valor = (float) REGISTRO_A.valor % (float) REGISTRO_B_HIJO.valor;
                                 return retorno;
                             }
 
                             default -> {
-                                this.texto_salida += "Error de tipos en la modulo, se intento operar " + r1.tipo;
+                                this.texto_salida += "Error modular: " + REGISTRO_A.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
@@ -454,45 +529,45 @@ public class Interpreter {
                     }
 
                     case "==" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
                         retorno.tipo = "binario";
-                        retorno.valor = r1.valor.equals(r2.valor);
+                        retorno.valor = REGISTRO_A.valor.equals(REGISTRO_B_HIJO.valor);
                         return retorno;
                     }
 
                     case "!=" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
                         retorno.tipo = "binario";
-                        retorno.valor = !(r1.valor.equals(r2.valor));
+                        retorno.valor = !(REGISTRO_A.valor.equals(REGISTRO_B_HIJO.valor));
                         return retorno;
                     }
 
                     case "<" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
                         retorno.tipo = "binario";
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) {
                             case "entero" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (int) r1.valor < (int) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor < (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (int) r1.valor < (float) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor < (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (int) r1.valor < (char) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor < (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error en la operacion" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -500,22 +575,22 @@ public class Interpreter {
                             }
 
                             case "doble" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (float) r1.valor < (int) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor < (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (float) r1.valor < (float) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor < (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (float) r1.valor < (char) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor < (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error operativo debido a  " + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -523,22 +598,22 @@ public class Interpreter {
                             }
 
                             case "caracter" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (char) r1.valor < (int) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor < (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (char) r1.valor < (float) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor < (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (char) r1.valor < (char) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor < (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error operativo: " + REGISTRO_A.tipo + " con " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -547,7 +622,7 @@ public class Interpreter {
 
                             default -> {
                                 retorno.tipo = null;
-                                this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                this.texto_salida += "Error operativo" + REGISTRO_A.tipo + " con " + REGISTRO_B_HIJO.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
@@ -555,27 +630,27 @@ public class Interpreter {
                     }
 
                     case "<=" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
                         retorno.tipo = "binario";
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) {
                             case "entero" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (int) r1.valor <= (int) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor <= (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (int) r1.valor <= (float) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor <= (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (int) r1.valor <= (char) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor <= (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -583,22 +658,22 @@ public class Interpreter {
                             }
 
                             case "doble" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (float) r1.valor <= (int) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor <= (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (float) r1.valor <= (float) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor <= (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (float) r1.valor <= (char) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor <= (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -606,22 +681,22 @@ public class Interpreter {
                             }
 
                             case "caracter" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (char) r1.valor <= (int) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor <= (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (char) r1.valor <= (float) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor <= (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (char) r1.valor <= (char) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor <= (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -630,7 +705,7 @@ public class Interpreter {
 
                             default -> {
                                 retorno.tipo = null;
-                                this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
@@ -638,27 +713,27 @@ public class Interpreter {
                     }
 
                     case ">" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
                         retorno.tipo = "binario";
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) {
                             case "entero" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (int) r1.valor > (int) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor > (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (int) r1.valor > (float) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor > (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (int) r1.valor > (char) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor > (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error de tipos " + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -666,22 +741,22 @@ public class Interpreter {
                             }
 
                             case "doble" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (float) r1.valor > (int) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor > (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (float) r1.valor > (float) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor > (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (float) r1.valor > (char) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor > (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -689,22 +764,22 @@ public class Interpreter {
                             }
 
                             case "caracter" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (char) r1.valor > (int) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor > (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (char) r1.valor > (float) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor > (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (char) r1.valor > (char) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor > (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -713,7 +788,7 @@ public class Interpreter {
 
                             default -> {
                                 retorno.tipo = null;
-                                this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
@@ -721,27 +796,27 @@ public class Interpreter {
                     }
 
                     case ">=" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
                         retorno.tipo = "binario";
-                        switch (r1.tipo) {
+                        switch (REGISTRO_A.tipo) {
                             case "entero" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (int) r1.valor >= (int) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor >= (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (int) r1.valor >= (float) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor >= (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (int) r1.valor >= (char) r2.valor;
+                                        retorno.valor = (int) REGISTRO_A.valor >= (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -749,22 +824,22 @@ public class Interpreter {
                             }
 
                             case "doble" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (float) r1.valor >= (int) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor >= (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (float) r1.valor >= (float) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor >= (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (float) r1.valor >= (char) r2.valor;
+                                        retorno.valor = (float) REGISTRO_A.valor >= (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -772,22 +847,22 @@ public class Interpreter {
                             }
 
                             case "caracter" -> {
-                                switch (r2.tipo) {
+                                switch (REGISTRO_B_HIJO.tipo) {
                                     case "entero" -> {
-                                        retorno.valor = (char) r1.valor >= (int) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor >= (int) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "doble" -> {
-                                        retorno.valor = (char) r1.valor >= (float) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor >= (float) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     case "caracter" -> {
-                                        retorno.valor = (char) r1.valor >= (char) r2.valor;
+                                        retorno.valor = (char) REGISTRO_A.valor >= (char) REGISTRO_B_HIJO.valor;
                                         return retorno;
                                     }
                                     default -> {
                                         retorno.tipo = null;
-                                        this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                        this.texto_salida += "Error de tipos " + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                         retorno.sentencia = "error";
                                         return retorno;
                                     }
@@ -796,7 +871,7 @@ public class Interpreter {
 
                             default -> {
                                 retorno.tipo = null;
-                                this.texto_salida += "Error de tipos en la operacion relacional, se intento operar " + r1.tipo + " y " + r2.tipo;
+                                this.texto_salida += "Error de tipos" + REGISTRO_A.tipo + " y " + REGISTRO_B_HIJO.tipo;
                                 retorno.sentencia = "error";
                                 return retorno;
                             }
@@ -804,113 +879,113 @@ public class Interpreter {
                     }
 
                     case "?" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
 
-                        if (!r1.tipo.equals("binario")) {
-                            this.texto_salida += "Error de tipos en la condicion ternaria, se esperaba binario pero se obtuvo " + r1.tipo;
+                        if (!REGISTRO_A.tipo.equals("binario")) {
+                            this.texto_salida += "Error de tipos" + REGISTRO_A.tipo;
                             retorno.sentencia = "error";
                             return retorno;
                         }
 
-                        if ((boolean) r1.valor) {
-                            return interpretar(entorno, actual.hijos.get(1));
+                        if ((boolean) REGISTRO_A.valor) {
+                            return interpretar(nivel, actual.hijos.get(1));
                         }
 
-                        return interpretar(entorno, actual.hijos.get(2));
+                        return interpretar(nivel, actual.hijos.get(2));
                     }
 
                     case "||" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
-                        if (!r1.tipo.equals("binario")) {
+                        if (!REGISTRO_A.tipo.equals("binario")) {
                             retorno.sentencia = "error";
-                            this.texto_salida += "Error de tipos en la operacion logica, se esperaba binario pero se obtuvo " + r1.tipo;
+                            this.texto_salida += "Error de tipos" + REGISTRO_A.tipo;
                             return retorno;
                         }
 
-                        if (!r1.tipo.equals(r2.tipo)) {
+                        if (!REGISTRO_A.tipo.equals(REGISTRO_B_HIJO.tipo)) {
                             retorno.sentencia = "error";
-                            this.texto_salida += "Error de tipos en la operacion logica, solo se puede hacer una operacion entre dos binarios";
+                            this.texto_salida += "Error de tipos";
                             return retorno;
                         }
 
                         retorno.tipo = "binario";
-                        retorno.valor = (boolean) r1.valor || (boolean) r2.valor;
+                        retorno.valor = (boolean) REGISTRO_A.valor || (boolean) REGISTRO_B_HIJO.valor;
                     }
 
                     case "&&" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
-                        r2 = interpretar(entorno, actual.hijos.get(1));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                        REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
 
-                        if (!r1.tipo.equals("binario")) {
+                        if (!REGISTRO_A.tipo.equals("binario")) {
                             retorno.sentencia = "error";
-                            this.texto_salida += "Error de tipos en la operacion logica, se esperaba binario pero se obtuvo " + r1.tipo;
+                            this.texto_salida += "Error de tipos " + REGISTRO_A.tipo;
                             return retorno;
                         }
 
-                        if (!r1.tipo.equals(r2.tipo)) {
+                        if (!REGISTRO_A.tipo.equals(REGISTRO_B_HIJO.tipo)) {
                             retorno.sentencia = "error";
-                            this.texto_salida += "Error de tipos en la operacion logica, solo se puede hacer una operacion entre dos binarios";
+                            this.texto_salida += "Error de tipos";
                             return retorno;
                         }
 
                         retorno.tipo = "binario";
-                        retorno.valor = (boolean) r1.valor && (boolean) r2.valor;
+                        retorno.valor = (boolean) REGISTRO_A.valor && (boolean) REGISTRO_B_HIJO.valor;
                     }
 
                     case "!" -> {
-                        r1 = interpretar(entorno, actual.hijos.get(0));
+                        REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
 
-                        if (!r1.tipo.equals("binario")) {
+                        if (!REGISTRO_A.tipo.equals("binario")) {
                             retorno.sentencia = "error";
-                            this.texto_salida += "Error de tipos en la operacion logica, se esperaba binario pero se obtuvo " + r1.tipo;
+                            this.texto_salida += "Error de tipos" + REGISTRO_A.tipo;
                             return retorno;
                         }
 
                         retorno.tipo = "binario";
-                        retorno.valor = !(boolean) r1.valor;
+                        retorno.valor = !(boolean) REGISTRO_A.valor;
                     }
 
                     default -> {
-                        return interpretar(entorno, actual.hijos.get(0));
+                        return interpretar(nivel, actual.hijos.get(0));
                     }
                 }
             }
 
             case "instrucciones" -> {
-                LogOutput r1;
+                LogOutput REGISTRO_A;
                 if (actual.hijos.size() == 2) {
-                    r1 = interpretar(entorno, actual.hijos.get(0));
-                    if (r1.sentencia != null) {
-                        return r1;
+                    REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                    if (REGISTRO_A.sentencia != null) {
+                        return REGISTRO_A;
                     }
-                    return interpretar(entorno, actual.hijos.get(1));
+                    return interpretar(nivel, actual.hijos.get(1));
                 } else {
-                    return interpretar(entorno, actual.hijos.get(0));
+                    return interpretar(nivel, actual.hijos.get(0));
                 }
             }
 
             case "declaracion_var" -> {
                 if (actual.hijos.size() == 3) {
-                    LogOutput r1 = interpretar(entorno, actual.hijos.get(2));
+                    LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(2));
                     String tipo = actual.hijos.get(0).dato;
 
-                    if (!tipo.equals(r1.tipo)) {
+                    if (!tipo.equals(REGISTRO_A.tipo)) {
                         retorno.sentencia = "error";
-                        this.texto_salida += "Error de tipos en la declaracion de variables, se esperaba " + tipo + " pero se obtuvo " + r1.tipo;
+                        this.texto_salida += "Error de tipos " + tipo + " pero se obtuvo " + REGISTRO_A.tipo;
                         return retorno;
                     }
 
                     ArrayList<String> variables = interpretar_lista_variables(actual.hijos.get(1));
 
                     variables.forEach((var) -> {
-                        SymTable var_actual = encontrar_simbolo(entorno, var, actual.hijos.get(1).entorno);
+                        SymTable var_actual = encontrar_simbolo(nivel, var, actual.hijos.get(1).nivel);
                         if (var_actual != null) {
-                            var_actual.valor = r1.valor;
+                            var_actual.valor = REGISTRO_A.valor;
                         } else {
                             retorno.sentencia = "error";
-                            this.texto_salida += "Error de tipos en la declaracion de variables, la variable '" + var + "' no existe en el entorno actual";
+                            this.texto_salida += "Error de tipos" + var + "' no existe en el nivel actual";
                         }
                     });
                 }
@@ -919,34 +994,34 @@ public class Interpreter {
             }
 
             case "asignacion_var" -> {
-                LogOutput r1 = interpretar(entorno, actual.hijos.get(1));
+                LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(1));
                 String identificador = actual.hijos.get(0).dato;
 
-                SymTable var_actual = encontrar_simbolo(entorno, identificador, actual.hijos.get(1).entorno);
+                SymTable var_actual = encontrar_simbolo(nivel, identificador, actual.hijos.get(1).nivel);
                 if (var_actual == null) {
-                    this.texto_salida += "Error en la asignacion de variable, la variable '" + identificador + "' no existe en el entorno actual";
+                    this.texto_salida += "Error: '" + identificador + "' no existe en este nvl";
                     retorno.sentencia = "error";
                     return retorno;
 
                 }
 
-                if (!var_actual.tipo.equals(r1.tipo)) {
-                    this.texto_salida += "Error de tipos en la asignacion de variable, se esperaba " + var_actual.tipo + " pero se obtuvo " + r1.tipo;
+                if (!var_actual.tipo.equals(REGISTRO_A.tipo)) {
+                    this.texto_salida += "Error " + var_actual.tipo + "recuperado: " + REGISTRO_A.tipo;
                     retorno.sentencia = "error";
                     return retorno;
                 }
 
-                var_actual.valor = r1.valor;
+                var_actual.valor = REGISTRO_A.valor;
                 return retorno;
             }
 
             case "actualizaciones" -> {
                 String identificador = actual.hijos.get(0).dato;
 
-                SymTable var_actual = encontrar_simbolo(entorno, identificador, actual.hijos.get(0).entorno);
+                SymTable var_actual = encontrar_simbolo(nivel, identificador, actual.hijos.get(0).nivel);
 
                 if (var_actual == null) {
-                    this.texto_salida += "Error en la actualizacion de variable, la variable '" + identificador + "' no existe en el entorno actual";
+                    this.texto_salida += "Error: " + identificador + "";
                     retorno.sentencia = "error";
                     return retorno;
 
@@ -963,7 +1038,7 @@ public class Interpreter {
                             }
                             default -> {
                                 retorno.sentencia = "error";
-                                this.texto_salida += "Error en la actualizacion de variable, se esperaba un numero, pero se obtuvo: " + var_actual.tipo;
+                                this.texto_salida += "Error: " + var_actual.tipo;
                             }
                         }
                     }
@@ -976,7 +1051,7 @@ public class Interpreter {
                                 var_actual.valor = (float) var_actual.valor - 1;
                             }
                             default -> {
-                                this.texto_salida += "Error en la actualizacion de variable, se esperaba un numero, pero se obtuvo: " + var_actual.tipo;
+                                this.texto_salida += "Error: " + var_actual.tipo;
                                 retorno.sentencia = "error";
                             }
                         }
@@ -987,18 +1062,18 @@ public class Interpreter {
             }
 
             case "funcion_imprimir" -> {
-                LogOutput r1 = interpretar(entorno, actual.hijos.get(0));
-                this.texto_salida += r1.valor + "\n";
+                LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                this.texto_salida += REGISTRO_A.valor + "\n";
                 return retorno;
             }
 
             case "sentencia_selector" -> {
-                LogOutput r1 = interpretar(entorno, actual.hijos.get(0));
+                LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
 
                 if (actual.hijos.size() == 3) {
-                    LogOutput r2 = interpretar(entorno, actual.hijos.get(1), r1);
-                    if (r2.sentencia == null) {
-                        LogOutput r3 = interpretar(entorno, actual.hijos.get(2), r1);
+                    LogOutput REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1), REGISTRO_A);
+                    if (REGISTRO_B_HIJO.sentencia == null) {
+                        LogOutput r3 = interpretar(nivel, actual.hijos.get(2), REGISTRO_A);
                         switch (r3.sentencia) {
                             case "cortar" -> {
                                 return retorno;
@@ -1008,23 +1083,23 @@ public class Interpreter {
                             }
                         }
                     } else {
-                        switch (r2.sentencia) {
+                        switch (REGISTRO_B_HIJO.sentencia) {
                             case "cortar" -> {
                                 return retorno;
                             }
                             default -> {
-                                return r2;
+                                return REGISTRO_B_HIJO;
                             }
                         }
                     }
                 } else {
-                    LogOutput r2 = interpretar(entorno, actual.hijos.get(1), r1);
-                    switch (r2.sentencia) {
+                    LogOutput REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1), REGISTRO_A);
+                    switch (REGISTRO_B_HIJO.sentencia) {
                         case "continuar" -> {
-                            return r2;
+                            return REGISTRO_B_HIJO;
                         }
                         case "retorno" -> {
-                            return r2;
+                            return REGISTRO_B_HIJO;
                         }
                         default -> {
                             return retorno;
@@ -1036,19 +1111,19 @@ public class Interpreter {
             }
 
             case "sentencia_si" -> {
-                LogOutput r1 = interpretar(entorno, actual.hijos.get(0));
+                LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
 
-                if (!r1.tipo.equals("binario")) {
-                    this.texto_salida += "Error en la condicion de si, se esperaba un binario, pero se obtuvo: " + r1.tipo;
+                if (!REGISTRO_A.tipo.equals("binario")) {
+                    this.texto_salida += "Error: " + REGISTRO_A.tipo;
                     retorno.sentencia = "error";
                     return retorno;
                 }
 
-                if ((boolean) r1.valor) {
-                    return interpretar(entorno, actual.hijos.get(1));
+                if ((boolean) REGISTRO_A.valor) {
+                    return interpretar(nivel, actual.hijos.get(1));
                 } else {
                     if (actual.hijos.size() == 3) {
-                        return interpretar(entorno, actual.hijos.get(2));
+                        return interpretar(nivel, actual.hijos.get(2));
                     }
                 }
 
@@ -1056,18 +1131,18 @@ public class Interpreter {
             }
 
             case "sentencia_mientras" -> {
-                LogOutput r1 = interpretar(entorno, actual.hijos.get(0));
-                LogOutput r2;
-                if (!r1.tipo.equals("binario")) {
-                    this.texto_salida += "Error en la condicion de mientras, se esperaba un binario, pero se obtuvo: " + r1.tipo;
+                LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                LogOutput REGISTRO_B_HIJO;
+                if (!REGISTRO_A.tipo.equals("binario")) {
+                    this.texto_salida += "Error: " + REGISTRO_A.tipo;
                     retorno.sentencia = "error";
                     return retorno;
                 }
 
-                while ((boolean) r1.valor) {
-                    r2 = interpretar(entorno, actual.hijos.get(1));
-                    if (r2.sentencia != null) {
-                        switch (r2.sentencia) {
+                while ((boolean) REGISTRO_A.valor) {
+                    REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(1));
+                    if (REGISTRO_B_HIJO.sentencia != null) {
+                        switch (REGISTRO_B_HIJO.sentencia) {
                             case "cortar" -> {
                                 break;
                             }
@@ -1075,32 +1150,32 @@ public class Interpreter {
                                 continue;
                             }
                             case "retorno" -> {
-                                return r2;
+                                return REGISTRO_B_HIJO;
                             }
                         }
                     }
 
-                    r1 = interpretar(entorno, actual.hijos.get(0));
+                    REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
                 }
 
                 return retorno;
             }
 
             case "sentencia_para" -> {
-                interpretar(entorno, actual.hijos.get(0));
-                LogOutput r1 = interpretar(entorno, actual.hijos.get(1));
+                interpretar(nivel, actual.hijos.get(0));
+                LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(1));
 
-                if (!r1.tipo.equals("binario")) {
-                    this.texto_salida += "Error en la condicion de mientras, se esperaba un binario, pero se obtuvo: " + r1.tipo;
+                if (!REGISTRO_A.tipo.equals("binario")) {
+                    this.texto_salida += "Error : " + REGISTRO_A.tipo;
                     retorno.sentencia = "error";
                     return retorno;
                 }
 
-                LogOutput r2;
-                while ((boolean) r1.valor) {
-                    r2 = interpretar(entorno, actual.hijos.get(3));
-                    if (r2.sentencia != null) {
-                        switch (r2.sentencia) {
+                LogOutput REGISTRO_B_HIJO;
+                while ((boolean) REGISTRO_A.valor) {
+                    REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(3));
+                    if (REGISTRO_B_HIJO.sentencia != null) {
+                        switch (REGISTRO_B_HIJO.sentencia) {
                             case "cortar" -> {
                                 break;
                             }
@@ -1108,41 +1183,41 @@ public class Interpreter {
                                 continue;
                             }
                             case "retorno" -> {
-                                return r2;
+                                return REGISTRO_B_HIJO;
                             }
                         }
                     }
 
-                    interpretar(entorno, actual.hijos.get(2));
-                    r1 = interpretar(entorno, actual.hijos.get(1));
+                    interpretar(nivel, actual.hijos.get(2));
+                    REGISTRO_A = interpretar(nivel, actual.hijos.get(1));
                 }
                 return retorno;
             }
 
             case "sentencia_hacer" -> {
-                LogOutput r2 = interpretar(entorno, actual.hijos.get(0));
-                if (r2.sentencia != null) {
-                    switch (r2.sentencia) {
+                LogOutput REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(0));
+                if (REGISTRO_B_HIJO.sentencia != null) {
+                    switch (REGISTRO_B_HIJO.sentencia) {
                         case "cortar" -> {
                             return retorno;
                         }
                         case "retorno" -> {
-                            return r2;
+                            return REGISTRO_B_HIJO;
                         }
                     }
                 }
 
-                LogOutput r1 = interpretar(entorno, actual.hijos.get(1));
+                LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(1));
 
-                if (!r1.tipo.equals("binario")) {
-                    this.texto_salida += "Error en la condicion de mientras, se esperaba un binario, pero se obtuvo: " + r1.tipo;
+                if (!REGISTRO_A.tipo.equals("binario")) {
+                    this.texto_salida += "Error: " + REGISTRO_A.tipo;
                     return retorno;
                 }
 
-                while ((boolean) r1.valor) {
-                    r2 = interpretar(entorno, actual.hijos.get(0));
-                    if (r2.sentencia != null) {
-                        switch (r2.sentencia) {
+                while ((boolean) REGISTRO_A.valor) {
+                    REGISTRO_B_HIJO = interpretar(nivel, actual.hijos.get(0));
+                    if (REGISTRO_B_HIJO.sentencia != null) {
+                        switch (REGISTRO_B_HIJO.sentencia) {
                             case "cortar" -> {
                                 break;
                             }
@@ -1150,12 +1225,12 @@ public class Interpreter {
                                 continue;
                             }
                             case "retorno" -> {
-                                return r2;
+                                return REGISTRO_B_HIJO;
                             }
                         }
                     }
 
-                    r1 = interpretar(entorno, actual.hijos.get(1));
+                    REGISTRO_A = interpretar(nivel, actual.hijos.get(1));
                 }
 
                 return retorno;
@@ -1175,9 +1250,9 @@ public class Interpreter {
                 retorno.sentencia = "retorno";
 
                 if (!actual.hijos.isEmpty()) {
-                    LogOutput r1 = interpretar(entorno, actual.hijos.get(0));
-                    retorno.tipo = r1.tipo;
-                    retorno.valor = r1.valor;
+                    LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                    retorno.tipo = REGISTRO_A.tipo;
+                    retorno.valor = REGISTRO_A.valor;
                 }
 
                 return retorno;
@@ -1185,27 +1260,27 @@ public class Interpreter {
 
             case "llamada" -> {
                 String identificador = actual.hijos.get(0).dato;
-                SymTable funcion = encontrar_funcion(entorno, identificador, actual.entorno);
+                SymTable funcion = encontrar_funcion(nivel, identificador, actual.nivel);
                 if (funcion == null) {
-                    this.texto_salida += "Error, la funcion/metodo '" + identificador + "' no existe en el entorno actual";
+                    this.texto_salida += "Error " + identificador + "";
                     retorno.sentencia = "error";
                     return retorno;
                 }
 
                 if (actual.hijos.size() == 1) {
                     if (funcion.parametros == null) {
-                        return interpretar(crear_nuevo_entorno(entorno, funcion.instrucciones.entorno), funcion.instrucciones);
+                        return interpretar(crear_nuevo_nivel(nivel, funcion.instrucciones.nivel), funcion.instrucciones);
                     } else {
-                        this.texto_salida += "Error en la llamada, la funcion/metodo " + funcion.identificador + " tiene " + funcion.parametros.size() + " parametros, pero se recibio 0";
+                        this.texto_salida += "Error " + funcion.identificador + "  " + funcion.parametros.size() + " ";
                         retorno.sentencia = "error";
                         return retorno;
                     }
                 } else {
-                    ArrayList<LogOutput> valores_parametros = interpretar_parametros(entorno, actual.hijos.get(1));
-                    ArrayList<SymTable> nuevo_entorno = crear_nuevo_entorno(entorno, funcion.instrucciones.entorno);
+                    ArrayList<LogOutput> valores_parametros = interpretar_parametros(nivel, actual.hijos.get(1));
+                    ArrayList<SymTable> nuevo_nivel = crear_nuevo_nivel(nivel, funcion.instrucciones.nivel);
                     
                     if(valores_parametros.size()!=funcion.parametros.size()){
-                        this.texto_salida += "Error en la llamada, la funcion/metodo " + funcion.identificador + " tiene " + funcion.parametros.size() + " parametros, pero se recibio"+valores_parametros.size();
+                        this.texto_salida += "Error  " + funcion.identificador + " tiene " + funcion.parametros.size() + " "+valores_parametros.size();
                         retorno.sentencia = "error";
                         return retorno;
                     }
@@ -1213,16 +1288,16 @@ public class Interpreter {
                     SymTable sim_actual;
                     
                     for(int i = 0; i<funcion.parametros.size();i++){
-                        sim_actual = encontrar_simbolo(nuevo_entorno, funcion.parametros.get(i), funcion.instrucciones.entorno);
+                        sim_actual = encontrar_simbolo(nuevo_nivel, funcion.parametros.get(i), funcion.instrucciones.nivel);
                         if(!sim_actual.tipo.equals(valores_parametros.get(i).tipo)){
-                           this.texto_salida += "Error en la llamada, el parametro "+sim_actual.identificador+" es de tipo "+sim_actual.tipo+", pero se recibio "+valores_parametros.get(i).tipo;
+                           this.texto_salida += "Error "+sim_actual.identificador+" "+sim_actual.tipo+",  "+valores_parametros.get(i).tipo;
                            retorno.sentencia = "error";
                            return retorno; 
                         }
                         sim_actual.valor = valores_parametros.get(i).valor;
                     }
                     
-                    return interpretar(nuevo_entorno, funcion.instrucciones);
+                    return interpretar(nuevo_nivel, funcion.instrucciones);
                 }
             }
 
@@ -1265,10 +1340,10 @@ public class Interpreter {
             case "ID" -> {
                 String identificador = actual.dato;
 
-                SymTable var_actual = encontrar_simbolo(entorno, identificador, actual.entorno);
+                SymTable var_actual = encontrar_simbolo(nivel, identificador, actual.nivel);
 
                 if (var_actual == null) {
-                    this.texto_salida += "Error, la variable '" + identificador + "' no existe en el entorno actual";
+                    this.texto_salida += "Error, la variable '" + identificador + "' no existe en el nivel actual";
                     retorno.sentencia = "error";
                     return retorno;
                 }
@@ -1289,42 +1364,42 @@ public class Interpreter {
         System.out.println(this.texto_salida);
     }
 
-    public LogOutput interpretar(ArrayList<SymTable> entorno, Nodo actual, LogOutput caso) {
+    public LogOutput interpretar(ArrayList<SymTable> nivel, Nodo actual, LogOutput caso) {
         LogOutput retorno = new LogOutput();
         switch (actual.titulo) {
             case "lista_casos" -> {
-                LogOutput r1 = interpretar(entorno, actual.hijos.get(0), caso);
+                LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(0), caso);
                 if (actual.hijos.size() == 2) {
-                    if (r1.sentencia == null) {
-                        return interpretar(entorno, actual.hijos.get(1), caso);
+                    if (REGISTRO_A.sentencia == null) {
+                        return interpretar(nivel, actual.hijos.get(1), caso);
                     }
                 }
-                return r1;
+                return REGISTRO_A;
             }
 
             case "caso" -> {
-                LogOutput r1 = interpretar(entorno, actual.hijos.get(0));
-                if (r1.tipo.equals(caso.tipo) && r1.valor.equals(caso.valor)) {
-                    return interpretar(entorno, actual.hijos.get(1));
+                LogOutput REGISTRO_A = interpretar(nivel, actual.hijos.get(0));
+                if (REGISTRO_A.tipo.equals(caso.tipo) && REGISTRO_A.valor.equals(caso.valor)) {
+                    return interpretar(nivel, actual.hijos.get(1));
                 }
 
             }
 
             case "defecto" -> {
-                return interpretar(entorno, actual.hijos.get(0));
+                return interpretar(nivel, actual.hijos.get(0));
             }
         }
 
         return retorno;
     }
 
-    public ArrayList<LogOutput> interpretar_parametros(ArrayList<SymTable> entorno, Nodo actual) {
+    public ArrayList<LogOutput> interpretar_parametros(ArrayList<SymTable> nivel, Nodo actual) {
         ArrayList<LogOutput> n_parametros = new ArrayList<>();
         if (actual.hijos.size() == 2) {
-            n_parametros = interpretar_parametros(entorno, actual.hijos.get(0));
-            n_parametros.add(interpretar(entorno, actual.hijos.get(1)));
+            n_parametros = interpretar_parametros(nivel, actual.hijos.get(0));
+            n_parametros.add(interpretar(nivel, actual.hijos.get(1)));
         } else {
-            n_parametros.add(interpretar(entorno, actual.hijos.get(0)));
+            n_parametros.add(interpretar(nivel, actual.hijos.get(0)));
         }
         return n_parametros;
     }
@@ -1333,7 +1408,7 @@ public class Interpreter {
         ArrayList<SymTable> variables_posibles = new ArrayList<>();
 
         symTSL.forEach((simbolo) -> {
-            if (simbolo.identificador.equals(nombre) && ambito.contains(simbolo.entorno)) {
+            if (simbolo.identificador.equals(nombre) && ambito.contains(simbolo.nivel)) {
                 variables_posibles.add(simbolo);
             }
         });
@@ -1346,7 +1421,7 @@ public class Interpreter {
 
         for (int i = 0; i < variables_posibles.size(); i++) {
             SymTable v = variables_posibles.get(i);
-            if (v.entorno.length() > retorno.entorno.length()) {
+            if (v.nivel.length() > retorno.nivel.length()) {
                 retorno = v;
             }
         }
@@ -1358,7 +1433,7 @@ public class Interpreter {
         ArrayList<SymTable> variables_posibles = new ArrayList<>();
 
         symTSL.forEach((simbolo) -> {
-            if (simbolo.identificador.equals(nombre) && ambito.contains(simbolo.entorno) && "funcionmetodo".contains(simbolo.rol)) {
+            if (simbolo.identificador.equals(nombre) && ambito.contains(simbolo.nivel) && "funcionmetodo".contains(simbolo.rol)) {
                 variables_posibles.add(simbolo);
             }
         });
@@ -1371,7 +1446,7 @@ public class Interpreter {
 
         for (int i = 0; i < variables_posibles.size(); i++) {
             SymTable v = variables_posibles.get(i);
-            if (v.entorno.length() > retorno.entorno.length()) {
+            if (v.nivel.length() > retorno.nivel.length()) {
                 retorno = v;
             }
         }
@@ -1379,24 +1454,24 @@ public class Interpreter {
         return retorno;
     }
 
-    public ArrayList<SymTable> crear_nuevo_entorno(ArrayList<SymTable> entorno_actual, String ambito) {
-        ArrayList<SymTable> nuevo_entorno = new ArrayList<>();
+    public ArrayList<SymTable> crear_nuevo_nivel(ArrayList<SymTable> nivel_actual, String ambito) {
+        ArrayList<SymTable> nuevo_nivel = new ArrayList<>();
 
-        entorno_actual.forEach((s) -> {
-            if (s.entorno.contains(ambito)) {
+        nivel_actual.forEach((s) -> {
+            if (s.nivel.contains(ambito)) {
                 SymTable copiado = new SymTable();
-                copiado.entorno = s.entorno;
+                copiado.nivel = s.nivel;
                 copiado.identificador = s.identificador;
                 copiado.instrucciones = s.instrucciones;
                 copiado.parametros = s.parametros;
                 copiado.rol = s.rol;
                 copiado.tipo = s.tipo;
                 copiado.valor = s.valor;
-                nuevo_entorno.add(copiado);
+                nuevo_nivel.add(copiado);
             } else {
-                nuevo_entorno.add(s);
+                nuevo_nivel.add(s);
             }
         });
-        return nuevo_entorno;
+        return nuevo_nivel;
     }
 }

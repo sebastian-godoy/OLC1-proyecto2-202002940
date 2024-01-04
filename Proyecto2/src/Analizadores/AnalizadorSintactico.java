@@ -732,7 +732,7 @@ class CUP$AnalizadorSintactico$actions {
 		Object a = (Object)((java_cup.runtime.Symbol) CUP$AnalizadorSintactico$stack.peek()).value;
 		 
 Nodo x = (Nodo)a;
-x.entorno = ""+x.hashCode();
+x.nivel = ""+x.hashCode();
 Proyecto2Compi1= new Interpreter(x);
               CUP$AnalizadorSintactico$result = parser.getSymbolFactory().newSymbol("programa",31, ((java_cup.runtime.Symbol)CUP$AnalizadorSintactico$stack.peek()), ((java_cup.runtime.Symbol)CUP$AnalizadorSintactico$stack.peek()), RESULT);
             }

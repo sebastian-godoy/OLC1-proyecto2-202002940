@@ -104,7 +104,7 @@ funcion_imprimir,
 programa;
 
 
-//Orden de precedencia
+//Orden de precedencia-------------------------------------------------------------------------------------------------
 precedence nonassoc equals;
 precedence left orsign;
 precedence left andsign;
@@ -121,7 +121,7 @@ start with programa;
 
 programa ::= instrucciones_g:a {: 
 Nodo x = (Nodo)a;
-x.entorno = ""+x.hashCode();
+x.nivel = ""+x.hashCode();
 Proyecto2Compi1= new Interpreter(x);:};
 
 instrucciones_g ::= instrucciones_g:a instruccion_g:b {: Nodo padre = new Nodo("instrucciones_g");
