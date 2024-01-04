@@ -1,12 +1,11 @@
-package analizadores;
+package Analizadores;
 import java_cup.runtime.Symbol;
-
 %% 
 
 %{ 
 %} 
 
-// ------> Expresiones Regulares 
+// Expresiones Regulares
 %class AnalizaLex
 %cup
 %public
@@ -15,197 +14,195 @@ import java_cup.runtime.Symbol;
 %full
 %char
 %unicode
-
-
 %init{
     yyline = 0;
     yychar = 0;
 %init}
 
-
 entero = [0-9]+
+cadena = (\")(\\.|[^\"])*(\")
+decimales = [0-9]+\.[0-9]+
+charr = (\'.\')|(\\.\')
+
+
+
+// ERS estandar
+escapado = "\\"
 identificador = [a-zA-Z_][a-zA-Z0-9_]*
 comentario = "//" .*
 comentariomultilinea = "/*" ([^*]|\/[^*])* "*/"
-escapado = "\\"
-cadena = (\")([^\"]|{escapado}\")*(\")
-decimales = [0-9]+\.[0-9]+
-charr = (\'.\')|(\'{escapado}.\')
+
 
 %%
-// ------------  Reglas Lexicas -------------------
+// Posibles tokens
 
-// ============ SIMBOLOS ============
+
+">="            {System.out.println("greaterequals");  
+                    return new Symbol(sym.greaterequals, yycolumn, yyline, yytext()); }
+
+"<="            {System.out.println("lesserequals");  
+                    return new Symbol(sym.lesserequals, yycolumn, yyline, yytext()); }
+
+"=="            {System.out.println("equalsequals");  
+                    return new Symbol(sym.equalsequals, yycolumn, yyline, yytext()); }
+
+","             {System.out.println("coma");  
+                    return new Symbol(sym.coma, yycolumn, yyline, yytext()); }
+
+"}"             {System.out.println("brack_close");  
+                    return new Symbol(sym.brack_close, yycolumn, yyline, yytext()); }
+
+";"             {System.out.println("prd_cma");  
+                    return new Symbol(sym.prd_cma, yycolumn, yyline, yytext()); }
+
+"*"             {System.out.println("times");  
+                    return new Symbol(sym.times, yycolumn, yyline, yytext()); }
+
+"+"             {System.out.println("plus");  
+                    return new Symbol(sym.plus, yycolumn, yyline, yytext()); }
+
+"-"             {System.out.println("minus");  
+                    return new Symbol(sym.minus, yycolumn, yyline, yytext()); }
+
+"!="            {System.out.println("diff");  
+                    return new Symbol(sym.diff, yycolumn, yyline, yytext()); }
+
+"++"            {System.out.println("masmas");  
+                    return new Symbol(sym.masmas, yycolumn, yyline, yytext()); }
+
+"--"            {System.out.println("menosmenos");  
+                    return new Symbol(sym.menosmenos, yycolumn, yyline, yytext()); }
+
+"&&"            {System.out.println("andsign");  
+                    return new Symbol(sym.andsign, yycolumn, yyline, yytext()); }
+
+"||"            {System.out.println("orsign");  
+                    return new Symbol(sym.orsign, yycolumn, yyline, yytext()); }
+
+"!"             {System.out.println("notsign");  
+                    return new Symbol(sym.notsign, yycolumn, yyline, yytext()); }
+
+"["             {System.out.println("coropen");  
+                    return new Symbol(sym.coropen, yycolumn, yyline, yytext()); }
+
+"]"             {System.out.println("corclose");  
+                    return new Symbol(sym.corclose, yycolumn, yyline, yytext()); }
+
+":"             {System.out.println("doublepoint");  
+                    return new Symbol(sym.doublepoint, yycolumn, yyline, yytext()); }
+
+"^"             {System.out.println("power");  
+                    return new Symbol(sym.power, yycolumn, yyline, yytext()); }
+
+"?"             {System.out.println("question");  
+                    return new Symbol(sym.question, yycolumn, yyline, yytext()); }
+
+"/"             {System.out.println("div");  
+                    return new Symbol(sym.div, yycolumn, yyline, yytext()); }
+
+"%"             {System.out.println("mod");  
+                    return new Symbol(sym.mod, yycolumn, yyline, yytext()); }
+
+"="             {System.out.println("equals");  
+                    return new Symbol(sym.equals, yycolumn, yyline, yytext()); }
+
+">"             {System.out.println("greater");  
+                    return new Symbol(sym.greater, yycolumn, yyline, yytext()); }
+
+"<"             {System.out.println("lesser");  
+                    return new Symbol(sym.lesser, yycolumn, yyline, yytext()); }
 
 "("             {
-                    System.out.println("PARENTESISABRE");
-                    return new Symbol(sym.PARENTESISABRE, yycolumn, yyline, yytext());
+                    System.out.println("open_par");
+                    return new Symbol(sym.open_par, yycolumn, yyline, yytext());
                 }
 
-")"             { System.out.println("PARENTESISCIERRA");  
-                    return new Symbol(sym.PARENTESISCIERRA, yycolumn, yyline, yytext()); }
+")"             { System.out.println("closed_par");  
+                    return new Symbol(sym.closed_par, yycolumn, yyline, yytext()); }
 
-"{"             {System.out.println("LLAVEABRE");  
-                    return new Symbol(sym.LLAVEABRE, yycolumn, yyline, yytext()); }
-
-"}"             {System.out.println("LLAVECIERRA");  
-                    return new Symbol(sym.LLAVECIERRA, yycolumn, yyline, yytext()); }
-
-";"             {System.out.println("PUNTOYCOMA");  
-                    return new Symbol(sym.PUNTOYCOMA, yycolumn, yyline, yytext()); }
-
-"*"             {System.out.println("SIGNOPOR");  
-                    return new Symbol(sym.SIGNOPOR, yycolumn, yyline, yytext()); }
-
-"+"             {System.out.println("SIGNOMAS");  
-                    return new Symbol(sym.SIGNOMAS, yycolumn, yyline, yytext()); }
-
-"-"             {System.out.println("SIGNOMENOS");  
-                    return new Symbol(sym.SIGNOMENOS, yycolumn, yyline, yytext()); }
-
-"/"             {System.out.println("SIGNODIVISION");  
-                    return new Symbol(sym.SIGNODIVISION, yycolumn, yyline, yytext()); }
-
-"%"             {System.out.println("SIGNOMODULO");  
-                    return new Symbol(sym.SIGNOMODULO, yycolumn, yyline, yytext()); }
-
-"="             {System.out.println("SIGNOIGUAL");  
-                    return new Symbol(sym.SIGNOIGUAL, yycolumn, yyline, yytext()); }
-
-">"             {System.out.println("SIGNOMAYOR");  
-                    return new Symbol(sym.SIGNOMAYOR, yycolumn, yyline, yytext()); }
-
-"<"             {System.out.println("SIGNOMENOR");  
-                    return new Symbol(sym.SIGNOMENOR, yycolumn, yyline, yytext()); }
-
-">="            {System.out.println("SIGNOMAYORIGUAL");  
-                    return new Symbol(sym.SIGNOMAYORIGUAL, yycolumn, yyline, yytext()); }
-
-"<="            {System.out.println("SIGNOMENORIGUAL");  
-                    return new Symbol(sym.SIGNOMENORIGUAL, yycolumn, yyline, yytext()); }
-
-"=="            {System.out.println("SIGNOIGUALIGUAL");  
-                    return new Symbol(sym.SIGNOIGUALIGUAL, yycolumn, yyline, yytext()); }
-
-","             {System.out.println("SIGNOCOMA");  
-                    return new Symbol(sym.SIGNOCOMA, yycolumn, yyline, yytext()); }
-
-"!="            {System.out.println("SIGNODIFERENTE");  
-                    return new Symbol(sym.SIGNODIFERENTE, yycolumn, yyline, yytext()); }
-
-"++"            {System.out.println("SIGNOINCREMENTO");  
-                    return new Symbol(sym.SIGNOINCREMENTO, yycolumn, yyline, yytext()); }
-
-"--"            {System.out.println("SIGNODECREMENTO");  
-                    return new Symbol(sym.SIGNODECREMENTO, yycolumn, yyline, yytext()); }
-
-"&&"            {System.out.println("SIGNOAND");  
-                    return new Symbol(sym.SIGNOAND, yycolumn, yyline, yytext()); }
-
-"||"            {System.out.println("SIGNOOR");  
-                    return new Symbol(sym.SIGNOOR, yycolumn, yyline, yytext()); }
-
-"!"             {System.out.println("SIGNONOT");  
-                    return new Symbol(sym.SIGNONOT, yycolumn, yyline, yytext()); }
-
-"["             {System.out.println("CORCHETEABRE");  
-                    return new Symbol(sym.CORCHETEABRE, yycolumn, yyline, yytext()); }
-
-"]"             {System.out.println("CORCHETECIERRA");  
-                    return new Symbol(sym.CORCHETECIERRA, yycolumn, yyline, yytext()); }
-
-":"             {System.out.println("DOSPUNTOS");  
-                    return new Symbol(sym.DOSPUNTOS, yycolumn, yyline, yytext()); }
-
-"^"             {System.out.println("SIGNOPOTENCIA");  
-                    return new Symbol(sym.SIGNOPOTENCIA, yycolumn, yyline, yytext()); }
-
-"?"             {System.out.println("SIGNOINTERROGACION");  
-                    return new Symbol(sym.SIGNOINTERROGACION, yycolumn, yyline, yytext()); }
-
-// ============ RESERVADAS ============
-
-"entero"           {System.out.println("RESERVADA_ENTERO");  
-                    return new Symbol(sym.RESERVADA_ENTERO, yycolumn, yyline, yytext()); }
-
-"doble"        {System.out.println("RESERVADA_DOBLE");  
-                    return new Symbol(sym.RESERVADA_DOBLE, yycolumn, yyline, yytext()); }
-
-"binario"          {System.out.println("RESERVADA_BINARIO");  
-                    return new Symbol(sym.RESERVADA_BINARIO, yycolumn, yyline, yytext()); }
-
-"verdadero"          {System.out.println("RESERVADA_VERDADERO");  
-                    return new Symbol(sym.RESERVADA_VERDADERO, yycolumn, yyline, yytext()); }
-
-"falso"         {System.out.println("RESERVADA_FALSO");  
-                    return new Symbol(sym.RESERVADA_FALSO, yycolumn, yyline, yytext()); }
-
-"caracter"          {System.out.println("RESERVADA_CARACTER");  
-                    return new Symbol(sym.RESERVADA_CARACTER, yycolumn, yyline, yytext()); }
-
-"cadena"        {System.out.println("RESERVADA_CADENA");  
-                    return new Symbol(sym.RESERVADA_CADENA, yycolumn, yyline, yytext()); }
-
-"si"            {System.out.println("RESERVADA_SI");  
-                    return new Symbol(sym.RESERVADA_SI, yycolumn, yyline, yytext()); }
-
-"sino"       {System.out.println("RESERVADA_SINO");  
-                    return new Symbol(sym.RESERVADA_SINO, yycolumn, yyline, yytext()); }
-
-"imprimir"       {System.out.println("RESERVADA_IMPRIMIR");  
-                    return new Symbol(sym.RESERVADA_IMPRIMIR, yycolumn, yyline, yytext()); }
-
-"selector"       {System.out.println("RESERVADA_SELECTOR");  
-                    return new Symbol(sym.RESERVADA_SELECTOR, yycolumn, yyline, yytext()); }
-
-"caso"       {System.out.println("RESERVADA_CASO");  
-                    return new Symbol(sym.RESERVADA_CASO, yycolumn, yyline, yytext()); }
-
-"pordefecto"       {System.out.println("RESERVADA_PORDEFECTO");  
-                    return new Symbol(sym.RESERVADA_PORDEFECTO, yycolumn, yyline, yytext()); }
-
-"mientras"       {System.out.println("RESERVADA_MIENTRAS");  
-                    return new Symbol(sym.RESERVADA_MIENTRAS, yycolumn, yyline, yytext()); }
-
-"para"       {System.out.println("RESERVADA_PARA");  
-                    return new Symbol(sym.RESERVADA_PARA, yycolumn, yyline, yytext()); }
-
-"hacer"       {System.out.println("RESERVADA_HACER");  
-                    return new Symbol(sym.RESERVADA_HACER, yycolumn, yyline, yytext()); }
-
-"cortar"       {System.out.println("RESERVADA_CORTAR");  
-                    return new Symbol(sym.RESERVADA_CORTAR, yycolumn, yyline, yytext()); }
-
-"continuar"       {System.out.println("RESERVADA_CONTINUAR");  
-                    return new Symbol(sym.RESERVADA_CONTINUAR, yycolumn, yyline, yytext()); }
-
-"retorno"       {System.out.println("RESERVADA_RETORNO");  
-                    return new Symbol(sym.RESERVADA_RETORNO, yycolumn, yyline, yytext()); }
-
-"void"       {System.out.println("RESERVADA_VOID");  
-                    return new Symbol(sym.RESERVADA_VOID, yycolumn, yyline, yytext()); }
-
-"redondeo"       {System.out.println("RESERVADA_REDONDEO");  
-                    return new Symbol(sym.RESERVADA_REDONDEO, yycolumn, yyline, yytext()); }
-
-"tipode"       {System.out.println("RESERVADA_TIPODE");   
-                    return new Symbol(sym.RESERVADA_TIPODE, yycolumn, yyline, yytext()); }
-
-"longitud"       {System.out.println("RESERVADA_LONGITUD");  
-                    return new Symbol(sym.RESERVADA_LONGITUD, yycolumn, yyline, yytext()); }
-
-"acadena"       {System.out.println("RESERVADA_ACADENA");  
-                    return new Symbol(sym.RESERVADA_ACADENA, yycolumn, yyline, yytext()); }
+"{"             {System.out.println("brack_open");  
+                    return new Symbol(sym.brack_open, yycolumn, yyline, yytext()); }
 
 
-"ejecutar"       {System.out.println("RESERVADA_EJECUTAR"); 
-                    return new Symbol(sym.RESERVADA_EJECUTAR, yycolumn, yyline, yytext()); }
+"entero"           {System.out.println("res_ENTERO");  
+                    return new Symbol(sym.res_ENTERO, yycolumn, yyline, yytext()); }
 
-"nuevo"       {System.out.println("RESERVADA_NUEVO");
-                    return new Symbol(sym.RESERVADA_NUEVO, yycolumn, yyline, yytext()); }
+"doble"        {System.out.println("res_DOBLE");  
+                    return new Symbol(sym.res_DOBLE, yycolumn, yyline, yytext()); }
+
+"binario"          {System.out.println("res_BINARIO");  
+                    return new Symbol(sym.res_BINARIO, yycolumn, yyline, yytext()); }
+
+"verdadero"          {System.out.println("res_VERDADERO");  
+                    return new Symbol(sym.res_VERDADERO, yycolumn, yyline, yytext()); }
+
+"falso"         {System.out.println("res_FALSO");  
+                    return new Symbol(sym.res_FALSO, yycolumn, yyline, yytext()); }
+
+"caracter"          {System.out.println("res_CARACTER");  
+                    return new Symbol(sym.res_CARACTER, yycolumn, yyline, yytext()); }
+
+"cadena"        {System.out.println("res_CADENA");  
+                    return new Symbol(sym.res_CADENA, yycolumn, yyline, yytext()); }
+
+"si"            {System.out.println("res_SI");  
+                    return new Symbol(sym.res_SI, yycolumn, yyline, yytext()); }
+
+"sino"       {System.out.println("res_SINO");  
+                    return new Symbol(sym.res_SINO, yycolumn, yyline, yytext()); }
+
+"imprimir"       {System.out.println("res_IMPRIMIR");  
+                    return new Symbol(sym.res_IMPRIMIR, yycolumn, yyline, yytext()); }
+
+"selector"       {System.out.println("res_SELECTOR");  
+                    return new Symbol(sym.res_SELECTOR, yycolumn, yyline, yytext()); }
+
+"caso"       {System.out.println("res_CASO");  
+                    return new Symbol(sym.res_CASO, yycolumn, yyline, yytext()); }
+
+"pordefecto"       {System.out.println("res_PORDEFECTO");  
+                    return new Symbol(sym.res_PORDEFECTO, yycolumn, yyline, yytext()); }
+
+"mientras"       {System.out.println("res_MIENTRAS");  
+                    return new Symbol(sym.res_MIENTRAS, yycolumn, yyline, yytext()); }
+
+"para"       {System.out.println("res_PARA");  
+                    return new Symbol(sym.res_PARA, yycolumn, yyline, yytext()); }
+
+"hacer"       {System.out.println("res_HACER");  
+                    return new Symbol(sym.res_HACER, yycolumn, yyline, yytext()); }
+
+"cortar"       {System.out.println("res_CORTAR");  
+                    return new Symbol(sym.res_CORTAR, yycolumn, yyline, yytext()); }
+
+"continuar"       {System.out.println("res_CONTINUAR");  
+                    return new Symbol(sym.res_CONTINUAR, yycolumn, yyline, yytext()); }
+
+"retorno"       {System.out.println("res_RETORNO");  
+                    return new Symbol(sym.res_RETORNO, yycolumn, yyline, yytext()); }
+
+"void"       {System.out.println("res_VOID");  
+                    return new Symbol(sym.res_VOID, yycolumn, yyline, yytext()); }
+
+"redondeo"       {System.out.println("res_REDONDEO");  
+                    return new Symbol(sym.res_REDONDEO, yycolumn, yyline, yytext()); }
+
+"tipode"       {System.out.println("res_TIPODE");   
+                    return new Symbol(sym.res_TIPODE, yycolumn, yyline, yytext()); }
+
+"longitud"       {System.out.println("res_LONGITUD");  
+                    return new Symbol(sym.res_LONGITUD, yycolumn, yyline, yytext()); }
+
+"acadena"       {System.out.println("res_ACADENA");  
+                    return new Symbol(sym.res_ACADENA, yycolumn, yyline, yytext()); }
 
 
-// ============ Guardar ER ============
+"ejecutar"       {System.out.println("res_EJECUTAR"); 
+                    return new Symbol(sym.res_EJECUTAR, yycolumn, yyline, yytext()); }
+
+"nuevo"       {System.out.println("res_NUEVO");
+                    return new Symbol(sym.res_NUEVO, yycolumn, yyline, yytext()); }
+
 
 {entero}        {System.out.println("ENTERO");  
                     return new Symbol(sym.ENTERO, yycolumn, yyline, yytext()); }
@@ -225,10 +222,8 @@ charr = (\'.\')|(\'{escapado}.\')
 {comentario}            {}
 {comentariomultilinea}  {}
 
-//------> Ingorados 
-[ \t\r\n\f]     {/* Espacios en blanco se ignoran */}
+[ \t\r\n\f]     {/* Blank */}
 
-//------> Errores Léxicos 
 .               {
                   System.out.println("Error Lexico: " + yytext() + " | Fila:" + yyline + " | Columna: " + yycolumn); 
                 }

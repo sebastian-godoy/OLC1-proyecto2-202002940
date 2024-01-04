@@ -3,40 +3,126 @@ import java_cup.runtime.*;
 
 
 parser code{:
-public Nodo avl;
+public Interpreter Proyecto2Compi1;
 :}
 
-terminal String PARENTESISABRE, PARENTESISCIERRA, LLAVEABRE, LLAVECIERRA, PUNTOYCOMA, SIGNOPOR, SIGNOMAS, SIGNOMENOS, 
-SIGNODIVISION, SIGNOMODULO, SIGNOIGUAL, SIGNOMAYOR, SIGNOMENOR, SIGNOMAYORIGUAL, SIGNOMENORIGUAL, SIGNOIGUALIGUAL, 
-SIGNOCOMA, SIGNODIFERENTE, SIGNOINCREMENTO, SIGNODECREMENTO, SIGNOOR, SIGNOAND, SIGNONOT, CORCHETEABRE, 
-CORCHETECIERRA, DOSPUNTOS, SIGNOPOTENCIA, SIGNOINTERROGACION, RESERVADA_ENTERO, RESERVADA_DOBLE, RESERVADA_BINARIO, 
-RESERVADA_VERDADERO, RESERVADA_FALSO, RESERVADA_CARACTER, RESERVADA_CADENA,RESERVADA_SI, RESERVADA_SINO, RESERVADA_IMPRIMIR, 
-RESERVADA_SELECTOR, RESERVADA_CASO, RESERVADA_PORDEFECTO, RESERVADA_MIENTRAS, RESERVADA_PARA, RESERVADA_HACER, 
-RESERVADA_CORTAR, RESERVADA_CONTINUAR, RESERVADA_RETORNO, RESERVADA_VOID, RESERVADA_REDONDEO, RESERVADA_TIPODE, 
-RESERVADA_ACADENA, RESERVADA_LONGITUD, RESERVADA_EJECUTAR, RESERVADA_NUEVO, ENTERO, ID, CADENA, CHARR, DECIMALES;
 
-non terminal instrucciones_g, instruccion_g, declaracion_fym, sentencia_ejecutar, declaracion_funcion, declaracion_metodo, 
-instrucciones, parametros, instruccion, parametro, tipo, declaracion_var, asignacion_var, lista_variables, expresion, dato, 
-casteo, actualizaciones, vector, lista_valores, declaracion_vector, acceso_vector, modificacion_vector, sentencia_si, 
-sentencia_selector, caso, defecto, sentencia_mientras, sentencia_para, sentencia_hacer, sentencia_cortar, lista_casos,
-sentencia_continuar, sentencia_retorno, llamada, 1parametros_llamada, funcion_imprimir, funcion_redondeo, funcion_longitud, 
-funcion_tipode, funcion_acadena, programa;
+//Declarar terminales --------------------------------------------------------------------------------------------
+terminal String open_par,
+closed_par, 
+brack_open, 
+brack_close, 
+prd_cma, 
+times, 
+plus, 
+minus, 
+div, 
+mod, 
+equals, 
+greater, 
+lesser, 
+greaterequals, 
+lesserequals, 
+equalsequals, 
+coma, 
+diff, 
+masmas, 
+menosmenos, 
+orsign, 
+andsign, 
+notsign, 
+coropen, 
+corclose, 
+doublepoint, 
+power, 
+question, 
+res_ENTERO, 
+res_DOBLE, 
+res_BINARIO, 
+res_VERDADERO, 
+res_FALSO, 
+res_CARACTER, 
+res_CADENA,
+res_SI, 
+res_SINO, 
+res_IMPRIMIR, 
+res_SELECTOR, 
+res_CASO, 
+res_PORDEFECTO, 
+res_MIENTRAS, 
+res_PARA, 
+res_HACER, 
+res_CORTAR, 
+res_CONTINUAR, 
+res_RETORNO, 
+res_VOID, 
+res_REDONDEO, 
+res_TIPODE, 
+res_ACADENA, 
+res_LONGITUD, 
+res_EJECUTAR, 
+res_NUEVO, 
+ENTERO, 
+ID, 
+CADENA, 
+CHARR, 
+DECIMALES;
 
-precedence nonassoc SIGNOINTERROGACION;
-precedence right SIGNOMENOS;
-precedence nonassoc SIGNOPOTENCIA;
-precedence left  SIGNODIVISION, SIGNOPOR;
-precedence left SIGNOMAS, SIGNOMENOS;
-precedence right SIGNOMODULO;
-precedence left SIGNOIGUALIGUAL, SIGNODIFERENTE, SIGNOMENOR, SIGNOMENORIGUAL, SIGNOMAYOR, SIGNOMAYORIGUAL;
-precedence right SIGNONOT;
-precedence left SIGNOAND;
-precedence left SIGNOOR;
-precedence nonassoc SIGNOIGUAL;
+
+
+//Declarar no terminales -------------------------------------------------------------------------------------------------------
+non terminal instrucciones_g, 
+instruccion_g, 
+declaracion_fym, 
+sentencia_ejecutar, 
+declaracion_funcion, 
+declaracion_metodo, 
+instrucciones, 
+parametros, 
+instruccion, 
+parametro, 
+tipo, 
+declaracion_var, 
+asignacion_var, 
+lista_variables, 
+expresion, dato, 
+actualizaciones, 
+sentencia_si, 
+sentencia_selector, 
+caso, 
+defecto, 
+sentencia_mientras, 
+sentencia_para, 
+sentencia_hacer, 
+sentencia_cortar, 
+lista_casos, 
+sentencia_continuar, 
+sentencia_retorno, 
+llamada, 
+parametros_llamada, 
+funcion_imprimir, 
+programa;
+
+
+//Orden de precedencia
+precedence nonassoc equals;
+precedence left orsign;
+precedence left andsign;
+precedence right notsign;
+precedence right minus;
+precedence left equalsequals, diff, lesser, lesserequals, greater, greaterequals;
+precedence left plus, minus;
+precedence left  div, times, mod;
+precedence nonassoc power;
+precedence nonassoc question;
+
 
 start with programa;
 
-programa ::= instrucciones_g:a {: avl=(Nodo)a; :};
+programa ::= instrucciones_g:a {: 
+Nodo x = (Nodo)a;
+x.entorno = ""+x.hashCode();
+Proyecto2Compi1= new Interpreter(x);:};
 
 instrucciones_g ::= instrucciones_g:a instruccion_g:b {: Nodo padre = new Nodo("instrucciones_g");
                                                          padre.hijos.add((Nodo)a);
@@ -46,45 +132,20 @@ instrucciones_g ::= instrucciones_g:a instruccion_g:b {: Nodo padre = new Nodo("
                                                          padre.hijos.add((Nodo)a);
                                                          RESULT=padre; :};
 
-instruccion_g ::= declaracion_fym:a {: RESULT=(Nodo)a; :}
-| sentencia_ejecutar:a {: RESULT=(Nodo)a; :} ;
 
-sentencia_ejecutar ::= RESERVADA_EJECUTAR ID:a PARENTESISABRE PARENTESISCIERRA PUNTOYCOMA {:
-    Nodo padre = new Nodo("sentencia_ejecutar"); 
-    padre.hijos.add(new Nodo("ID", a));
-    RESULT=padre;
-:}
-| RESERVADA_EJECUTAR ID:a PARENTESISABRE parametros_llamada:b PARENTESISCIERRA PUNTOYCOMA{:
-    Nodo padre = new Nodo("sentencia_ejecutar"); 
-    padre.hijos.add(new Nodo("ID", a));
-    padre.hijos.add((Nodo)b);
-    RESULT=padre;
-:} ;
 
 
 declaracion_fym ::= declaracion_funcion:a {: RESULT=(Nodo)a; :}
 | declaracion_metodo:a {: RESULT=(Nodo)a; :} ;
 
-declaracion_metodo ::= RESERVADA_VOID ID:a PARENTESISABRE parametros:b PARENTESISCIERRA LLAVEABRE instrucciones:c LLAVECIERRA{:
-    Nodo padre = new Nodo("declaracion_metodo"); 
-    padre.hijos.add(new Nodo("ID", a));
-    padre.hijos.add((Nodo)b);
-    padre.hijos.add((Nodo)c);
-    RESULT=padre;
-:}
-| RESERVADA_VOID ID:a PARENTESISABRE PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA{:
-    Nodo padre = new Nodo("declaracion_metodo"); 
-    padre.hijos.add(new Nodo("ID", a));
-    padre.hijos.add((Nodo)b);
-    RESULT=padre;
-:};
+
 
 parametros ::= parametro:a {:
     Nodo padre = new Nodo("parametros"); 
     padre.hijos.add((Nodo)a);
     RESULT=padre;
 :}
-| parametros:a SIGNOCOMA parametro:b {:
+| parametros:a coma parametro:b {:
     Nodo padre = new Nodo("parametros"); 
     padre.hijos.add((Nodo)a);
     padre.hijos.add((Nodo)b);
@@ -98,11 +159,11 @@ parametro ::= tipo:a ID:b{:
     RESULT=padre;
 :};
 
-tipo ::= RESERVADA_ENTERO:a {: RESULT=new Nodo("RESERVADA_ENTERO",a); :} 
-| RESERVADA_DOBLE:a {: RESULT=new Nodo("RESERVADA_DOBLE",a); :} 
-| RESERVADA_BINARIO:a {: RESULT=new Nodo("RESERVADA_BINARIO",a); :} 
-| RESERVADA_CARACTER:a {: RESULT=new Nodo("RESERVADA_CARACTER",a); :} 
-| RESERVADA_CADENA:a {: RESULT=new Nodo("RESERVADA_CADENA",a); :} ;
+tipo ::= res_ENTERO:a {: RESULT=new Nodo("res_ENTERO",a); :} 
+| res_DOBLE:a {: RESULT=new Nodo("res_DOBLE",a); :} 
+| res_BINARIO:a {: RESULT=new Nodo("res_BINARIO",a); :} 
+| res_CARACTER:a {: RESULT=new Nodo("res_CARACTER",a); :} 
+| res_CADENA:a {: RESULT=new Nodo("res_CADENA",a); :} ;
 
 instrucciones ::= instrucciones:a instruccion:b {: 
 Nodo padre = new Nodo("instrucciones");
@@ -116,9 +177,7 @@ RESULT=padre; :};
 
 instruccion ::= declaracion_var:a {: RESULT=(Nodo)a; :}
 | asignacion_var:a {: RESULT=(Nodo)a; :}
-| actualizaciones:a PUNTOYCOMA {: RESULT=(Nodo)a; :}
-| declaracion_vector:a {: RESULT=(Nodo)a; :}
-| modificacion_vector:a {: RESULT=(Nodo)a; :}
+| actualizaciones:a prd_cma {: RESULT=(Nodo)a; :}
 | funcion_imprimir:a {: RESULT=(Nodo)a; :}
 | sentencia_selector:a {: RESULT=(Nodo)a; :}
 | sentencia_si:a {: RESULT=(Nodo)a; :}
@@ -128,16 +187,16 @@ instruccion ::= declaracion_var:a {: RESULT=(Nodo)a; :}
 | sentencia_cortar:a {: RESULT=(Nodo)a; :}
 | sentencia_continuar:a {: RESULT=(Nodo)a; :}
 | sentencia_retorno:a {: RESULT=(Nodo)a; :}
-| llamada:a PUNTOYCOMA {: RESULT=(Nodo)a; :};
+| llamada:a prd_cma {: RESULT=(Nodo)a; :};
 
-declaracion_var ::= tipo:a lista_variables:b SIGNOIGUAL expresion:c PUNTOYCOMA {: 
+declaracion_var ::= tipo:a lista_variables:b equals expresion:c prd_cma {: 
 Nodo padre = new Nodo("declaracion_var");
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)b);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
 
-| tipo:a lista_variables:b PUNTOYCOMA {: 
+| tipo:a lista_variables:b prd_cma {: 
 Nodo padre = new Nodo("declaracion_var");
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)b);
@@ -148,222 +207,262 @@ Nodo padre = new Nodo("lista_variables");
 padre.hijos.add(new Nodo("ID",a));
 RESULT=padre; :}
 
-| lista_variables:a SIGNOCOMA ID:b {: 
+| lista_variables:a coma ID:b {: 
 Nodo padre = new Nodo("lista_variables");
 padre.hijos.add((Nodo)a);
 padre.hijos.add(new Nodo("ID",b));
 RESULT=padre; :};
 
-expresion ::= expresion:a SIGNOMAS:b expresion:c {: 
+declaracion_metodo ::= res_VOID ID:a open_par parametros:b closed_par brack_open instrucciones:c brack_close{:
+    Nodo padre = new Nodo("declaracion_metodo"); 
+    padre.hijos.add(new Nodo("ID", a));
+    padre.hijos.add((Nodo)b);
+    padre.hijos.add((Nodo)c);
+    RESULT=padre;
+:}
+| res_VOID ID:a open_par closed_par brack_open instrucciones:b brack_close{:
+    Nodo padre = new Nodo("declaracion_metodo"); 
+    padre.hijos.add(new Nodo("ID", a));
+    padre.hijos.add((Nodo)b);
+    RESULT=padre;
+:};
+
+expresion ::= expresion:a plus:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| expresion:a SIGNOMENOS:b expresion:c {: 
+
+
+
+
+
+
+| expresion:a minus:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| expresion:a SIGNOPOR:b expresion:c {: 
+
+
+
+
+
+
+| expresion:a times:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| expresion:a SIGNODIVISION:b expresion:c {: 
+
+
+
+| expresion:a div:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| expresion:a SIGNOPOTENCIA:b expresion:c {: 
+
+
+
+
+
+| expresion:a power:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| expresion:a SIGNOMODULO:b expresion:c {: 
+
+
+
+
+| expresion:a mod:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| SIGNOMENOS:b expresion:a{: 
+
+
+
+
+
+| minus:b expresion:a{: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 RESULT=padre; :}
-| expresion:a SIGNOIGUALIGUAL:b expresion:c {: 
-Nodo padre = new Nodo("expresion", b);
-padre.hijos.add((Nodo)a);
-padre.hijos.add((Nodo)c);
-RESULT=padre; :}
-| expresion:a SIGNODIFERENTE:b expresion:c {: 
-Nodo padre = new Nodo("expresion", b);
-padre.hijos.add((Nodo)a);
-padre.hijos.add((Nodo)c);
-RESULT=padre; :}
-| expresion:a SIGNOMENOR:b expresion:c {: 
-Nodo padre = new Nodo("expresion", b);
-padre.hijos.add((Nodo)a);
-padre.hijos.add((Nodo)c);
-RESULT=padre; :}
-| expresion:a SIGNOMENORIGUAL:b expresion:c {: 
+
+
+
+
+| expresion:a equalsequals:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| expresion:a SIGNOMAYOR:b expresion:c {: 
+
+
+
+
+| expresion:a diff:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| expresion:a SIGNOMAYORIGUAL:b expresion:c {: 
+
+
+
+
+
+
+
+| expresion:a lesser:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| expresion:a SIGNOINTERROGACION:b expresion:c DOSPUNTOS expresion:d {: 
+
+
+
+
+
+
+
+| expresion:a lesserequals:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+
+
+
+
+
+| expresion:a greater:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+
+
+
+
+
+
+
+
+
+| expresion:a greaterequals:b expresion:c {: 
+Nodo padre = new Nodo("expresion", b);
+padre.hijos.add((Nodo)a);
+padre.hijos.add((Nodo)c);
+RESULT=padre; :}
+
+
+
+
+
+
+
+
+| expresion:a question:b expresion:c doublepoint expresion:d {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 padre.hijos.add((Nodo)d);
 RESULT=padre; :}
-| expresion:a SIGNOOR:b expresion:c {: 
+
+
+
+
+| expresion:a orsign:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| expresion:a SIGNOAND:b expresion:c {: 
+
+
+
+
+
+| expresion:a andsign:b expresion:c {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 padre.hijos.add((Nodo)c);
 RESULT=padre; :}
-| SIGNONOT:b expresion:a {: 
+
+
+
+
+
+| notsign:b expresion:a {: 
 Nodo padre = new Nodo("expresion", b);
 padre.hijos.add((Nodo)a);
 RESULT=padre; :}
-| PARENTESISABRE expresion:a PARENTESISCIERRA {:RESULT = (Nodo)a;:}
-| casteo:a {:RESULT = (Nodo)a;:}
-| vector:a {:RESULT = (Nodo)a;:}
-| acceso_vector:a {:RESULT = (Nodo)a;:}
+
+
+
+
+
+
+| open_par expresion:a closed_par {: 
+Nodo padre = new Nodo("expresion"); 
+padre.hijos.add((Nodo)a);
+RESULT = padre;:}
 | dato:a {:RESULT = (Nodo)a;:}
-| funcion_redondeo:a {:RESULT = (Nodo)a;:}
-| funcion_longitud:a {:RESULT = (Nodo)a;:}
-| funcion_tipode:a {:RESULT = (Nodo)a;:}
-| funcion_acadena:a {:RESULT = (Nodo)a;:}
 | llamada:a {:RESULT = (Nodo)a;:};
+
+
+
+instruccion_g ::= declaracion_fym:a {: RESULT=(Nodo)a; :}
+| sentencia_ejecutar:a {: RESULT=(Nodo)a; :} ;
+
+sentencia_ejecutar ::= res_EJECUTAR llamada:a prd_cma {:
+    Nodo padre = new Nodo("sentencia_ejecutar"); 
+    padre.hijos.add((Nodo)a);
+    RESULT=padre;
+:};
 
 dato ::= ID:a {:RESULT = new Nodo("ID", a);:}
 | ENTERO:a {:RESULT = new Nodo("ENTERO", a);:}
 | CADENA:a  {:RESULT = new Nodo("CADENA", a);:}
 | CHARR:a  {:RESULT = new Nodo("CHARR", a);:}
 | DECIMALES:a  {:RESULT = new Nodo("DECIMALES", a);:}
-| RESERVADA_VERDADERO:a  {:RESULT = new Nodo("RESERVADA_VERDADERO", a);:}
-| RESERVADA_FALSO:a  {:RESULT = new Nodo("RESERVADA_FALSO", a);:}; 
+| res_VERDADERO:a  {:RESULT = new Nodo("res_VERDADERO", a);:}
+| res_FALSO:a  {:RESULT = new Nodo("res_FALSO", a);:}; 
 
-asignacion_var ::= ID:a SIGNOIGUAL expresion:b PUNTOYCOMA{: 
+asignacion_var ::= ID:a equals expresion:b prd_cma{: 
 Nodo padre = new Nodo("asignacion_var");
 padre.hijos.add(new Nodo("ID", a));
 padre.hijos.add((Nodo)b);
-RESULT=padre; :}
-;
+RESULT=padre; :};
 
-casteo ::= PARENTESISABRE tipo:a PARENTESISCIERRA expresion:b {:
-Nodo padre = new Nodo("casteo");
-padre.hijos.add((Nodo)a);
-padre.hijos.add((Nodo)b);
-RESULT=padre;
-:}
-;
 
-actualizaciones ::= ID:a SIGNOINCREMENTO:b {:
+
+
+// SEGUNDA MITAD ----------------------------------------------------------------------------------------------------------------------
+actualizaciones ::= ID:a masmas:b {:
 Nodo padre = new Nodo("actualizaciones", b);
 padre.hijos.add(new Nodo("ID",a));
 RESULT=padre; :}
-| ID:a SIGNODECREMENTO:b {:
+| ID:a menosmenos:b {:
 Nodo padre = new Nodo("actualizaciones", b);
 padre.hijos.add(new Nodo("ID",a));
 RESULT=padre; :};
 
-declaracion_vector ::= tipo:a ID:b CORCHETEABRE CORCHETECIERRA SIGNOIGUAL RESERVADA_NUEVO tipo CORCHETEABRE expresion:c CORCHETECIERRA PUNTOYCOMA {:
-    Nodo padre = new Nodo("declaracion_vector");
-        padre.hijos.add((Nodo)a);
-        padre.hijos.add(new Nodo("ID",b));
-        padre.hijos.add((Nodo)c);
-        RESULT=padre;
-:}
-| tipo:a ID:b CORCHETEABRE CORCHETECIERRA CORCHETEABRE CORCHETECIERRA SIGNOIGUAL RESERVADA_NUEVO tipo CORCHETEABRE expresion:c CORCHETECIERRA CORCHETEABRE expresion:d CORCHETECIERRA PUNTOYCOMA{:
-        Nodo padre = new Nodo("declaracion_vector");
-        padre.hijos.add((Nodo)a);
-        padre.hijos.add(new Nodo("ID",b));
-        padre.hijos.add((Nodo)c);
-        padre.hijos.add((Nodo)d);
-        RESULT=padre;
-:}
-| tipo:a ID:b CORCHETEABRE CORCHETECIERRA SIGNOIGUAL vector:c PUNTOYCOMA{:
-        Nodo padre = new Nodo("declaracion_vector");
-        padre.hijos.add((Nodo)a);
-        padre.hijos.add(new Nodo("ID",b));
-        padre.hijos.add((Nodo)c);
-        RESULT=padre;
-
-:}
-| tipo:a ID:b CORCHETEABRE CORCHETECIERRA CORCHETEABRE CORCHETECIERRA SIGNOIGUAL vector:c PUNTOYCOMA {:
-        Nodo padre = new Nodo("declaracion_vector");
-        padre.hijos.add((Nodo)a);
-        padre.hijos.add(new Nodo("ID",b));
-        padre.hijos.add((Nodo)c);
-        RESULT=padre;
-:};
-
-vector ::= CORCHETEABRE lista_valores:a CORCHETECIERRA {: 
-        Nodo padre = new Nodo("vector");
-        padre.hijos.add((Nodo)a);
-        RESULT=padre;
-:};
-
-lista_valores ::= expresion:a {: 
-        Nodo padre = new Nodo("lista_valores");
-        padre.hijos.add((Nodo)a);
-        RESULT=padre;
-:}
-| lista_valores:a SIGNOCOMA expresion:b {:
-        Nodo padre = new Nodo("lista_valores");
-        padre.hijos.add((Nodo)a);
-        padre.hijos.add((Nodo)b);
-        RESULT=padre;
-:};
-
-acceso_vector ::= acceso_vector:a  CORCHETEABRE expresion:b CORCHETECIERRA {:
-        Nodo padre = new Nodo("acceso_vector");
-        padre.hijos.add((Nodo)a);
-        padre.hijos.add((Nodo)b);
-        RESULT=padre;
-:}
-| ID:a CORCHETEABRE expresion:b CORCHETECIERRA {:
-        Nodo padre = new Nodo("acceso_vector");
-        padre.hijos.add(new Nodo("ID",a));
-        padre.hijos.add((Nodo)b);
-        RESULT=padre;
-:};
-
-modificacion_vector ::= acceso_vector:a SIGNOIGUAL expresion:b PUNTOYCOMA {:
-        Nodo padre = new Nodo("modificacion_vector");
-        padre.hijos.add((Nodo)a);
-        padre.hijos.add((Nodo)b);
-        RESULT=padre;
-:};
-
-sentencia_si ::= RESERVADA_SI PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA {:
+sentencia_si ::= res_SI open_par expresion:a closed_par brack_open instrucciones:b brack_close {:
         Nodo padre = new Nodo("sentencia_si");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
         RESULT=padre;
 :}
-| RESERVADA_SI PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA RESERVADA_SINO LLAVEABRE instrucciones:c LLAVECIERRA {:
+| res_SI open_par expresion:a closed_par brack_open instrucciones:b brack_close res_SINO brack_open instrucciones:c brack_close {:
         Nodo padre = new Nodo("sentencia_si");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
         padre.hijos.add((Nodo)c);
         RESULT=padre;
 :}
-| RESERVADA_SI PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA RESERVADA_SINO sentencia_si:c {:
+| res_SI open_par expresion:a closed_par brack_open instrucciones:b brack_close res_SINO sentencia_si:c {:
         Nodo padre = new Nodo("sentencia_si");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
@@ -371,20 +470,20 @@ sentencia_si ::= RESERVADA_SI PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEA
         RESULT=padre;
 :};
 
-sentencia_selector ::= RESERVADA_SELECTOR PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE lista_casos:b defecto:c LLAVECIERRA {:
+sentencia_selector ::= res_SELECTOR open_par expresion:a closed_par brack_open lista_casos:b defecto:c brack_close {:
         Nodo padre = new Nodo("sentencia_selector");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
         padre.hijos.add((Nodo)c);
         RESULT=padre;
 :}
-| RESERVADA_SELECTOR PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE lista_casos:b LLAVECIERRA {:
+| res_SELECTOR open_par expresion:a closed_par brack_open lista_casos:b brack_close {:
         Nodo padre = new Nodo("sentencia_selector");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
         RESULT=padre;
 :}
-| RESERVADA_SELECTOR PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE defecto:b LLAVECIERRA {:
+| res_SELECTOR open_par expresion:a closed_par brack_open defecto:b brack_close {:
         Nodo padre = new Nodo("sentencia_selector");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
@@ -399,27 +498,34 @@ lista_casos ::= lista_casos:a caso:b {:
 :}
 | caso:a {: RESULT=(Nodo)a; :};
 
-caso ::= RESERVADA_CASO expresion:a DOSPUNTOS instrucciones:b {:
+caso ::= res_CASO expresion:a doublepoint instrucciones:b {:
         Nodo padre = new Nodo("caso");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
         RESULT=padre;
 :};
 
-defecto ::= RESERVADA_PORDEFECTO DOSPUNTOS instrucciones:a {:
+defecto ::= res_PORDEFECTO doublepoint instrucciones:a {:
         Nodo padre = new Nodo("defecto");
         padre.hijos.add((Nodo)a);
         RESULT=padre;
 :};
 
-sentencia_mientras ::= RESERVADA_MIENTRAS PARENTESISABRE expresion:a PARENTESISCIERRA LLAVEABRE instrucciones:b LLAVECIERRA {:
+
+
+
+
+sentencia_mientras ::= res_MIENTRAS open_par expresion:a closed_par brack_open instrucciones:b brack_close {:
         Nodo padre = new Nodo("sentencia_mientras");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
         RESULT=padre;
 :};
 
-sentencia_para ::= RESERVADA_PARA PARENTESISABRE declaracion_var:a expresion:b PUNTOYCOMA actualizaciones:c PARENTESISCIERRA LLAVEABRE instrucciones:d LLAVECIERRA {:
+
+
+
+sentencia_para ::= res_PARA open_par declaracion_var:a expresion:b prd_cma actualizaciones:c closed_par brack_open instrucciones:d brack_close {:
         Nodo padre = new Nodo("sentencia_para");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
@@ -427,7 +533,7 @@ sentencia_para ::= RESERVADA_PARA PARENTESISABRE declaracion_var:a expresion:b P
         padre.hijos.add((Nodo)d);
         RESULT=padre;
 :}
-| RESERVADA_PARA PARENTESISABRE asignacion_var:a expresion:b PUNTOYCOMA actualizaciones:c PARENTESISCIERRA LLAVEABRE instrucciones:d LLAVECIERRA {:
+| res_PARA open_par asignacion_var:a expresion:b prd_cma actualizaciones:c closed_par brack_open instrucciones:d brack_close {:
         Nodo padre = new Nodo("sentencia_para");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
@@ -436,34 +542,46 @@ sentencia_para ::= RESERVADA_PARA PARENTESISABRE declaracion_var:a expresion:b P
         RESULT=padre;
 :};
 
-sentencia_hacer ::= RESERVADA_HACER LLAVEABRE instrucciones:a LLAVECIERRA RESERVADA_MIENTRAS PARENTESISABRE expresion:b PARENTESISCIERRA PUNTOYCOMA {:
+
+
+
+
+sentencia_hacer ::= res_HACER brack_open instrucciones:a brack_close res_MIENTRAS open_par expresion:b closed_par prd_cma {:
         Nodo padre = new Nodo("sentencia_hacer");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
         RESULT=padre;
 :};
 
-sentencia_cortar ::= RESERVADA_CORTAR PUNTOYCOMA {:
+sentencia_cortar ::= res_CORTAR prd_cma {:
         Nodo padre = new Nodo("sentencia_cortar");
         RESULT=padre;
 :};
 
-sentencia_continuar ::= RESERVADA_CONTINUAR PUNTOYCOMA {:
+
+
+
+
+sentencia_continuar ::= res_CONTINUAR prd_cma {:
         Nodo padre = new Nodo("sentencia_continuar");
         RESULT=padre;
 :};
 
-sentencia_retorno ::= RESERVADA_RETORNO PUNTOYCOMA {:
+sentencia_retorno ::= res_RETORNO prd_cma {:
         Nodo padre = new Nodo("sentencia_retorno");
         RESULT=padre;
 :}
-| RESERVADA_RETORNO expresion:a PUNTOYCOMA {:
+| res_RETORNO expresion:a prd_cma {:
         Nodo padre = new Nodo("sentencia_retorno");
         padre.hijos.add((Nodo)a);
         RESULT=padre;
 :};
 
-declaracion_funcion ::= tipo:a ID:b PARENTESISABRE parametros:c PARENTESISCIERRA LLAVEABRE instrucciones:d LLAVECIERRA {:
+
+
+
+
+declaracion_funcion ::= tipo:a ID:b open_par parametros:c closed_par brack_open instrucciones:d brack_close {:
         Nodo padre = new Nodo("declaracion_funcion");
         padre.hijos.add((Nodo)a);
         padre.hijos.add(new Nodo("ID",b));
@@ -471,7 +589,7 @@ declaracion_funcion ::= tipo:a ID:b PARENTESISABRE parametros:c PARENTESISCIERRA
         padre.hijos.add((Nodo)d);
         RESULT=padre;
 :}
-| tipo:a ID:b PARENTESISABRE PARENTESISCIERRA LLAVEABRE instrucciones:c LLAVECIERRA {:
+| tipo:a ID:b open_par closed_par brack_open instrucciones:c brack_close {:
         Nodo padre = new Nodo("declaracion_funcion");
         padre.hijos.add((Nodo)a);
         padre.hijos.add(new Nodo("ID",b));
@@ -479,19 +597,25 @@ declaracion_funcion ::= tipo:a ID:b PARENTESISABRE parametros:c PARENTESISCIERRA
         RESULT=padre;
 :};
 
-llamada ::= ID:a PARENTESISABRE parametros_llamada:b PARENTESISCIERRA {:
+
+
+
+llamada ::= ID:a open_par parametros_llamada:b closed_par {:
         Nodo padre = new Nodo("llamada");
         padre.hijos.add(new Nodo("ID",a));
         padre.hijos.add((Nodo)b);
         RESULT=padre;
 :}
-| ID:a PARENTESISABRE PARENTESISCIERRA {:
+| ID:a open_par closed_par {:
         Nodo padre = new Nodo("llamada");
         padre.hijos.add(new Nodo("ID",a));
         RESULT=padre;
 :};
 
-parametros_llamada ::= parametros_llamada:a SIGNOCOMA expresion:b {:
+
+
+
+parametros_llamada ::= parametros_llamada:a coma expresion:b {:
         Nodo padre = new Nodo("parametros_llamada");
         padre.hijos.add((Nodo)a);
         padre.hijos.add((Nodo)b);
@@ -503,32 +627,11 @@ parametros_llamada ::= parametros_llamada:a SIGNOCOMA expresion:b {:
         RESULT=padre;
 :};
 
-funcion_imprimir ::= RESERVADA_IMPRIMIR PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
+
+
+
+funcion_imprimir ::= res_IMPRIMIR open_par expresion:a closed_par prd_cma {:
         Nodo padre = new Nodo("funcion_imprimir");
-        padre.hijos.add((Nodo)a);
-        RESULT=padre;
-:};
-
-funcion_redondeo ::= RESERVADA_REDONDEO PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
-        Nodo padre = new Nodo("funcion_redondeo");
-        padre.hijos.add((Nodo)a);
-        RESULT=padre;
-:};
-
-funcion_longitud ::= RESERVADA_LONGITUD PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
-        Nodo padre = new Nodo("funcion_longitud");
-        padre.hijos.add((Nodo)a);
-        RESULT=padre;
-:};
-
-funcion_tipode ::= RESERVADA_TIPODE PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
-        Nodo padre = new Nodo("funcion_tipode");
-        padre.hijos.add((Nodo)a);
-        RESULT=padre;
-:};
-
-funcion_acadena ::= RESERVADA_ACADENA PARENTESISABRE expresion:a PARENTESISCIERRA PUNTOYCOMA {:
-        Nodo padre = new Nodo("funcion_acadena");
         padre.hijos.add((Nodo)a);
         RESULT=padre;
 :};

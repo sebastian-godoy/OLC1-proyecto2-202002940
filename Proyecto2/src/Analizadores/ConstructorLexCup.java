@@ -1,6 +1,6 @@
 package Analizadores;
 
-public class Generador {
+public class ConstructorLexCup {
     public static void main(String[] args){
         try{
         String ruta = "src/Analizadores/";
